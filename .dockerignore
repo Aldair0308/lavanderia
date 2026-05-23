@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.git
+.codegraph
+coverage
+*.log
+.DS_Store
+.gitignore
+.dockerignore
+README.md
+OPENCODE.md
+nul

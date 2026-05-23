@@ -1,0 +1,39 @@
+{
+  "name": "lavanderia-os",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npx jest",
+    "dev": "docker compose -f docker-compose.dev.yml up -d",
+    "dev:stop": "docker compose -f docker-compose.dev.yml down",
+    "dev:logs": "docker compose -f docker-compose.dev.yml logs -f",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "codegraph": "codegraph update"
+  },
+  "devDependencies": {
+    "@colbymchenry/codegraph": "^0.7.9",
+    "@types/axios": "^0.14.4",
+    "@types/jest": "^30.0.0",
+    "axios": "^1.16.1",
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@nestjs/axios": "^4.0.1"
+  },
+  "description": "> Sistema completo de administración para lavanderías — desde la experiencia del cliente hasta la gestión interna, automatización de WhatsApp y retención de clientes con inteligencia.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

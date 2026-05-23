@@ -1,0 +1,33 @@
+{
+  "generated": "2026-05-19T18:30:00.000Z",
+  "sections": [
+    {
+      "id": "mockups",
+      "label": "Mockups",
+      "groups": [
+        {
+          "slug": "lavanderia-frontend",
+          "files": [
+            { "label": "home.html", "path": "opendesign/mockups/lavanderia-frontend/home.html" },
+            { "label": "services.html", "path": "opendesign/mockups/lavanderia-frontend/services.html" },
+            { "label": "create-order.html", "path": "opendesign/mockups/lavanderia-frontend/create-order.html" },
+            { "label": "order-status.html", "path": "opendesign/mockups/lavanderia-frontend/order-status.html" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "design-systems",
+      "label": "Design Systems",
+      "groups": [
+        {
+          "slug": "lavanderia",
+          "files": [
+            { "label": "SKILL.md", "path": "opendesign/design-systems/lavanderia/SKILL.md" },
+            { "label": "colors_and_type.css", "path": "opendesign/design-systems/lavanderia/tokens/colors_and_type.css" }
+          ]
+        }
+      ]
+    }
+  ]
+}

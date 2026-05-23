@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servicios — Lavandería OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAF8F5;
+      --fg: #1C1917;
+      --muted: #78716C;
+      --accent: #0D9488;
+      --accent-light: #CCFBF1;
+      --warm: #D97706;
+      --warm-light: #FEF3C7;
+      --card: #FFFFFF;
+      --border: #E7E5E4;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 1px 3px rgba(28,25,23,0.06), 0 1px 2px rgba(28,25,23,0.04);
+      --shadow-md: 0 4px 12px rgba(28,25,23,0.08), 0 2px 4px rgba(28,25,23,0.04);
+      --shadow-lg: 0 12px 32px rgba(28,25,23,0.1), 0 4px 8px rgba(28,25,23,0.04);
+      --font-display: 'DM Serif Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --nav-h: 64px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      background: rgba(250,248,245,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--fg);
+    }
+
+    .nav-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .nav-links {
+      display: none;
+      list-style: none;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--fg);
+    }
+
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .nav-cta {
+      display: none;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .nav-cta:hover { background: #0F766E; transform: translateY(-1px); }
+
+    .nav-hamburger {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--fg);
+      border-radius: 2px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: var(--nav-h);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      z-index: 99;
+      box-shadow: var(--shadow-md);
+    }
+
+    .mobile-menu.open { display: block; }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 0;
+      font-weight: 500;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover,
+    .mobile-menu a.active { color: var(--accent); }
+
+    .mobile-menu-cta {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      .nav { padding: 0 40px; }
+      .nav-links { display: flex; }
+      .nav-cta { display: inline-flex; }
+      .nav-hamburger { display: none; }
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      padding: calc(var(--nav-h) + 40px) 20px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .breadcrumb a {
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb-sep { opacity: 0.4; }
+    .breadcrumb-current { color: var(--fg); font-weight: 500; }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .page-header p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    @media (min-width: 768px) {
+      .page-header { padding: calc(var(--nav-h) + 60px) 40px 48px; }
+    }
+
+    /* ── Services Grid ── */
+    .services-section {
+      padding: 0 20px 64px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 640px) {
+      .services-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+    }
+
+    @media (min-width: 768px) {
+      .services-section { padding: 0 40px 80px; }
+    }
+
+    /* ── Service Card ── */
+    .service-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .service-card-visual {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      background: radial-gradient(circle at 30% 40%, currentColor 0%, transparent 70%);
+    }
+
+    .service-card-visual .icon-wrapper {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-card-visual .icon-wrapper svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .service-card-visual--blue {
+      background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 50%, #93C5FD 100%);
+      color: #2563EB;
+    }
+
+    .service-card-visual--blue .icon-wrapper {
+      background: rgba(37,99,235,0.15);
+      color: #2563EB;
+    }
+
+    .service-card-visual--amber {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 50%, #FCD34D 100%);
+      color: #D97706;
+    }
+
+    .service-card-visual--amber .icon-wrapper {
+      background: rgba(217,119,6,0.15);
+      color: #D97706;
+    }
+
+    .service-card-visual--purple {
+      background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 50%, #C4B5FD 100%);
+      color: #7C3AED;
+    }
+
+    .service-card-visual--purple .icon-wrapper {
+      background: rgba(124,58,237,0.15);
+      color: #7C3AED;
+    }
+
+    .service-card-visual--teal {
+      background: linear-gradient(135deg, #CCFBF1 0%, #99F6E4 50%, #5EEAD4 100%);
+      color: #0D9488;
+    }
+
+    .service-card-visual--teal .icon-wrapper {
+      background: rgba(13,148,136,0.15);
+      color: #0D9488;
+    }
+
+    .service-card-body {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-card-body h3 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      margin-bottom: 8px;
+    }
+
+    .service-card-body p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .service-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .service-card-price {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--fg);
+    }
+
+    .service-card-price span {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .service-card-link {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s, color 0.2s;
+    }
+
+    .service-card-link:hover {
+      gap: 8px;
+      color: #0F766E;
+    }
+
+    /* ── FAQ Section ── */
+    .faq-section {
+      padding: 64px 20px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .faq-section > .faq-inner > p {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 40px;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .faq-item[open] {
+      border-color: var(--accent);
+    }
+
+    .faq-item summary {
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      list-style: none;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .faq-item summary::-webkit-details-marker { display: none; }
+
+    .faq-item summary::after {
+      content: '+';
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      margin-left: 12px;
+      transition: transform 0.25s, color 0.2s;
+    }
+
+    .faq-item[open] summary::after {
+      content: '−';
+      color: var(--accent);
+    }
+
+    .faq-item[open] summary {
+      background: var(--accent-light);
+    }
+
+    .faq-item summary:hover { background: #f5f3f0; }
+    .faq-item[open] summary:hover { background: var(--accent-light); }
+
+    .faq-item .faq-answer {
+      padding: 0 20px 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (min-width: 768px) {
+      .faq-section { padding: 80px 40px; }
+      .faq-item summary { padding: 18px 24px; font-size: 1rem; }
+      .faq-item .faq-answer { padding: 0 24px 20px; font-size: 0.95rem; }
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: auto;
+      background: var(--fg);
+      color: #D6D3D1;
+      padding: 48px 20px 24px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .footer-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+    }
+
+    .footer-brand-name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .footer-col p {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: #A8A29E;
+    }
+
+    .footer-col h4 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col ul a {
+      font-size: 0.85rem;
+      color: #A8A29E;
+      transition: color 0.2s;
+    }
+
+    .footer-col ul a:hover { color: #fff; }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 32px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #78716C;
+      text-align: center;
+    }
+
+    @media (min-width: 640px) {
+      .footer-inner { grid-template-columns: 2fr 1fr 1fr 1fr; }
+      .footer-bottom { flex-direction: row; justify-content: space-between; text-align: left; }
+    }
+
+    @media (min-width: 768px) {
+      .footer { padding: 64px 40px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Nav ═══ -->
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <div class="nav-brand-icon">L</div>
+      Lavandería
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="services.html" class="active">Servicios</a></li>
+      <li><a href="solicitar.html">Solicitar</a></li>
+    </ul>
+    <button class="nav-cta" onclick="location.href='solicitar.html'">Solicitar pickup</button>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Inicio</a>
+    <a href="services.html" class="active">Servicios</a>
+    <a href="solicitar.html">Solicitar</a>
+    <button class="mobile-menu-cta" onclick="location.href='solicitar.html'">Solicitar pickup</button>
+  </div>
+
+  <!-- ═══ Page Header ═══ -->
+  <header class="page-header">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Inicio</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Servicios</span>
+    </nav>
+    <h1>Nuestros servicios</h1>
+    <p>Desde un lavado rápido hasta el paquete completo con planchado — recogemos tu ropa en tu puerta y la devolvemos limpia, doblada y lista para guardar.</p>
+  </header>
+
+  <!-- ═══ Services Grid ═══ -->
+  <section class="services-section">
+    <div class="services-grid">
+
+      <!-- Lavado -->
+      <article class="service-card">
+        <div class="service-card-visual service-card-visual--blue">
+          <div class="icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h1l1.5-3h13L20 6h1"/>
+              <path d="M4 6v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6"/>
+              <circle cx="12" cy="13" r="3"/>
+              <path d="M8 13a4 4 0 0 1 .5-2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="service-card-body">
+          <h3>Lavado</h3>
+          <p>Lavado profesional con detergentes suaves e hipoalergénicos. Tu ropa sale limpia, con aroma fresco y cuidada al máximo.</p>
+          <div class="service-card-meta">
+            <div class="service-card-price">$24/kg <span>mín 5 kg</span></div>
+            <a href="solicitar.html" class="service-card-link">Solicitar →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Secado -->
+      <article class="service-card">
+        <div class="service-card-visual service-card-visual--amber">
+          <div class="icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2"/>
+              <path d="M12 20v2"/>
+              <path d="M4.93 4.93l1.41 1.41"/>
+              <path d="M17.66 17.66l1.41 1.41"/>
+              <path d="M2 12h2"/>
+              <path d="M20 12h2"/>
+              <path d="M6.34 17.66l-1.41 1.41"/>
+              <path d="M19.07 4.93l-1.41 1.41"/>
+            </svg>
+          </div>
+        </div>
+        <div class="service-card-body">
+          <h3>Secado</h3>
+          <p>Secado controlado a temperatura óptima para cada tipo de tela. Evita encogimientos y mantiene la suavidad original.</p>
+          <div class="service-card-meta">
+            <div class="service-card-price">$18/kg <span>mín 3 kg</span></div>
+            <a href="solicitar.html" class="service-card-link">Solicitar →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Planchado -->
+      <article class="service-card">
+        <div class="service-card-visual service-card-visual--purple">
+          <div class="icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 2h4v4h-4z"/>
+              <path d="M6 8h12l3 8H3z"/>
+              <path d="M3 16h18v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="service-card-body">
+          <h3>Planchado</h3>
+          <p>Planchado profesional con vapor y temperatura ajustada. Camisas impecables, pantalones con raya perfecta — listo para usar.</p>
+          <div class="service-card-meta">
+            <div class="service-card-price">$32/kg <span>mín 3 kg</span></div>
+            <a href="solicitar.html" class="service-card-link">Solicitar →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Paquete completo -->
+      <article class="service-card">
+        <div class="service-card-visual service-card-visual--teal">
+          <div class="icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="service-card-body">
+          <h3>Paquete completo</h3>
+          <p>Lavado + secado + planchado en un solo paquete. La opción más conveniente y económica — tu ropa lista para el clóset.</p>
+          <div class="service-card-meta">
+            <div class="service-card-price">$55/kg <span>mín 5 kg</span></div>
+            <a href="solicitar.html" class="service-card-link">Solicitar →</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══ FAQ ═══ -->
+  <section class="faq-section">
+    <div class="faq-inner">
+      <h2>Preguntas frecuentes</h2>
+      <p>Todo lo que necesitas saber antes de solicitar tu pickup.</p>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>¿Cuánto tarda la entrega?</summary>
+          <div class="faq-answer">El tiempo estándar es de 24 horas hábiles desde la recolección. Para pedidos antes de las 10:00 a.m., ofrecemos entrega same-day con costo adicional de $49. Recibirás un SMS con el horario estimado de entrega.</div>
+        </details>
+
+        <details class="faq-item">
+          <summary>¿Qué tipos de tela pueden procesarse?</summary>
+          <div class="faq-answer">Trabajamos con algodón, lino, poliéster, mezclillas y la mayoría de telas sintéticas. Para seda, lana y prendas delicadas contamos con ciclo especial — solo indícalo en tu solicitud. No procesamos prendas de cuero o piel.</div>
+        </details>
+
+        <details class="faq-item">
+          <summary>¿Cómo se calcula el precio?</summary>
+          <div class="faq-answer">El costo se basa en el peso real de tu ropa al momento de recibirlo, medido en báscula digital con precisión de ±10 g. Cada servicio tiene un mínimo de kilos indicado. Si tu ropa pesa menos del mínimo, se cobra el mínimo.</div>
+        </details>
+
+        <details class="faq-item">
+          <summary>¿Qué pasa si mi ropa se daña?</summary>
+          <div class="faq-answer">Contamos con garantía total: si una prenda sufre daño por negligencia nuestra, la reponemos al valor de reposición (máx. $2,000 MXN por prenda). Reporta cualquier incidencia dentro de las primeras 24 horas tras la entrega.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <div class="footer-brand-icon">L</div>
+          <span class="footer-brand-name">Lavandería</span>
+        </div>
+        <p>Servicio profesional de lavandería a domicilio en la CDMX y zona metropolitana. Recogemos, lavamos y entregamos — tú solo disfruta ropa limpia.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="services.html">Lavado</a></li>
+          <li><a href="services.html">Secado</a></li>
+          <li><a href="services.html">Planchado</a></li>
+          <li><a href="services.html">Paquete completo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Nosotros</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Trabaja con nosotros</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+          <li><a href="#">Aviso legal</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Lavandería OS. Todos los derechos reservados.</span>
+      <span>Hecho con 🧼 en Ciudad de México</span>
+    </div>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    let menuOpen = false;
+
+    hamburger.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('open', menuOpen);
+      const spans = hamburger.querySelectorAll('span');
+      if (menuOpen) {
+        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+        spans[1].style.opacity = '0';
+        spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+      } else {
+        spans[0].style.transform = '';
+        spans[1].style.opacity = '';
+        spans[2].style.transform = '';
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (menuOpen && !hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+        menuOpen = false;
+        mobileMenu.classList.remove('open');
+        const spans = hamburger.querySelectorAll('span');
+        spans[0].style.transform = '';
+        spans[1].style.opacity = '';
+        spans[2].style.transform = '';
+      }
+    });
+  </script>
+
+</body>
+</html>

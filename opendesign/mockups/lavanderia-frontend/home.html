@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lavandería OS — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-1: #FAF8F5; --bg-2: #F2EDE7; --bg-3: #E8E0D5;
+  --fg-1: #1C1917; --fg-2: #44403C; --fg-3: #78716C;
+  --accent-1: #0D9488; --accent-2: #14B8A6; --accent-3: #99F6E4;
+  --warm-1: #D97706; --warm-2: #F59E0B; --warm-3: #FEF3C7;
+  --white: #FFFFFF; --border: #D6D3D1;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 2px rgba(28,25,23,0.05);
+  --shadow-md: 0 4px 12px rgba(28,25,23,0.08);
+  --shadow-lg: 0 8px 30px rgba(28,25,23,0.12);
+  --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg-1); color: var(--fg-1); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+/* ── Nav ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,248,245,0.85); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(214,211,209,0.5);
+  transition: background 0.3s;
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+}
+.nav-brand {
+  font-family: var(--font-display); font-size: 1.5rem; color: var(--fg-1);
+  text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+}
+.nav-brand-icon {
+  width: 36px; height: 36px; background: var(--accent-1); border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;
+}
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  color: var(--fg-2); text-decoration: none; font-size: 0.9375rem; font-weight: 500;
+  transition: color 0.15s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--accent-1); transition: width 0.2s;
+}
+.nav-links a:hover { color: var(--fg-1); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  background: var(--accent-1); color: white; border: none; padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.9375rem;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.nav-cta:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; padding: 8rem 1.5rem 4rem;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(13,148,136,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(217,119,6,0.06) 0%, transparent 60%),
+    var(--bg-1);
+}
+.hero-grain {
+  position: absolute; inset: 0; z-index: 1; opacity: 0.3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative; z-index: 2; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+}
+.hero-text { max-width: 560px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--accent-3); color: var(--accent-1); padding: 0.375rem 1rem;
+  border-radius: var(--radius-full); font-size: 0.8125rem; font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+.hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-1); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(2.75rem, 6vw, 4rem);
+  line-height: 1.1; margin-bottom: 1.25rem; color: var(--fg-1);
+}
+.hero h1 em { font-style: italic; color: var(--accent-1); }
+.hero-sub {
+  font-size: 1.125rem; color: var(--fg-2); line-height: 1.7;
+  margin-bottom: 2rem; max-width: 480px;
+}
+.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--accent-1); color: white; border: none;
+  padding: 0.875rem 2rem; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.btn-primary:hover { background: var(--accent-2); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: transparent; color: var(--fg-1); border: 1.5px solid var(--border);
+  padding: 0.875rem 2rem; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 1rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.btn-secondary:hover { border-color: var(--fg-2); background: var(--bg-2); }
+.hero-visual {
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+.hero-card {
+  background: var(--white); border-radius: var(--radius-xl); padding: 2rem;
+  box-shadow: var(--shadow-lg); border: 1px solid rgba(214,211,209,0.4);
+  width: 100%; max-width: 420px; position: relative;
+}
+.hero-card-header {
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+}
+.hero-card-avatar {
+  width: 48px; height: 48px; border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 1.25rem; font-weight: 600;
+}
+.hero-card-name { font-weight: 600; font-size: 1rem; }
+.hero-card-label { font-size: 0.8125rem; color: var(--fg-3); }
+.hero-card-divider { height: 1px; background: var(--bg-2); margin: 1rem 0; }
+.hero-card-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.625rem 0; font-size: 0.9375rem;
+}
+.hero-card-item-label { color: var(--fg-3); }
+.hero-card-item-value { font-weight: 600; color: var(--fg-1); }
+.hero-card-status {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  background: #ECFDF5; color: #059669; padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full); font-size: 0.8125rem; font-weight: 600;
+}
+.hero-card-status-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #059669;
+  animation: pulse 2s infinite;
+}
+.hero-card-float {
+  position: absolute; background: var(--white); border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem; box-shadow: var(--shadow-md); font-size: 0.8125rem;
+  display: flex; align-items: center; gap: 0.5rem; animation: float 3s ease-in-out infinite;
+}
+.hero-card-float-1 { top: -12px; right: -20px; animation-delay: 0s; }
+.hero-card-float-2 { bottom: 20px; left: -24px; animation-delay: 1.5s; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.float-icon {
+  width: 28px; height: 28px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.875rem;
+}
+.float-icon-teal { background: var(--accent-3); color: var(--accent-1); }
+.float-icon-amber { background: var(--warm-3); color: var(--warm-1); }
+
+/* ── Stats ── */
+.stats {
+  padding: 4rem 1.5rem; position: relative; z-index: 2;
+}
+.stats-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+}
+.stat-card {
+  text-align: center; padding: 2rem 1rem;
+}
+.stat-number {
+  font-family: var(--font-display); font-size: 3rem; color: var(--accent-1);
+  line-height: 1; margin-bottom: 0.5rem;
+}
+.stat-label { font-size: 0.9375rem; color: var(--fg-3); }
+
+/* ── Services ── */
+.services {
+  padding: 6rem 1.5rem; background: var(--white);
+}
+.services-inner { max-width: 1200px; margin: 0 auto; }
+.section-header {
+  text-align: center; margin-bottom: 3.5rem; max-width: 600px; margin-left: auto; margin-right: auto;
+}
+.section-tag {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.75rem;
+  color: var(--accent-1); letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.section-header h2 {
+  font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.15; margin-bottom: 0.75rem;
+}
+.section-header p { font-size: 1.0625rem; color: var(--fg-3); line-height: 1.7; }
+.services-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+}
+.service-card {
+  background: var(--bg-1); border-radius: var(--radius-lg); padding: 2rem;
+  border: 1px solid transparent; transition: all 0.3s; cursor: pointer;
+}
+.service-card:hover {
+  border-color: var(--accent-1); transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+.service-icon {
+  width: 56px; height: 56px; border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 1.25rem;
+}
+.service-icon-wash { background: #E0F2FE; color: #0284C7; }
+.service-icon-dry { background: var(--warm-3); color: var(--warm-1); }
+.service-icon-iron { background: #F3E8FF; color: #9333EA; }
+.service-card h3 {
+  font-family: var(--font-display); font-size: 1.375rem; margin-bottom: 0.5rem;
+}
+.service-card p { font-size: 0.9375rem; color: var(--fg-3); line-height: 1.6; margin-bottom: 1rem; }
+.service-price {
+  font-family: var(--font-mono); font-size: 1.125rem; font-weight: 600;
+  color: var(--accent-1);
+}
+.service-price span { font-size: 0.8125rem; color: var(--fg-3); font-weight: 400; }
+
+/* ── How it works ── */
+.how-it-works {
+  padding: 6rem 1.5rem; background: var(--bg-1);
+}
+.how-it-works-inner { max-width: 1200px; margin: 0 auto; }
+.steps {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+  position: relative;
+}
+.steps::before {
+  content: ''; position: absolute; top: 40px; left: 16.67%; right: 16.67%;
+  height: 2px; background: linear-gradient(to right, var(--accent-1), var(--warm-1));
+  z-index: 0;
+}
+.step { text-align: center; position: relative; z-index: 1; }
+.step-number {
+  width: 56px; height: 56px; border-radius: var(--radius-full);
+  background: var(--white); border: 2px solid var(--accent-1);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 1.375rem; color: var(--accent-1);
+  margin: 0 auto 1.25rem; font-weight: 700;
+}
+.step h3 {
+  font-family: var(--font-body); font-size: 1.125rem; font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.step p { font-size: 0.9375rem; color: var(--fg-3); line-height: 1.6; max-width: 280px; margin: 0 auto; }
+
+/* ── CTA ── */
+.cta {
+  padding: 6rem 1.5rem;
+}
+.cta-inner {
+  max-width: 900px; margin: 0 auto;
+  background: linear-gradient(135deg, var(--accent-1), #0F766E);
+  border-radius: var(--radius-xl); padding: 4rem 3rem;
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-pattern {
+  position: absolute; inset: 0; opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.cta-inner h2 {
+  font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.5rem);
+  color: white; margin-bottom: 1rem; position: relative; z-index: 1;
+}
+.cta-inner p {
+  color: rgba(255,255,255,0.85); font-size: 1.125rem;
+  margin-bottom: 2rem; position: relative; z-index: 1;
+}
+.cta-inner .btn-primary {
+  background: white; color: var(--accent-1); position: relative; z-index: 1;
+}
+.cta-inner .btn-primary:hover { background: var(--bg-1); }
+
+/* ── Footer ── */
+.footer {
+  padding: 3rem 1.5rem; background: var(--fg-1); color: rgba(255,255,255,0.6);
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-brand { font-family: var(--font-display); font-size: 1.25rem; color: white; }
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.875rem; }
+.footer-links a:hover { color: white; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero { padding: 6rem 1.25rem 3rem; }
+  .hero-content { grid-template-columns: 1fr; gap: 2.5rem; text-align: center; }
+  .hero-text { max-width: 100%; }
+  .hero-sub { margin-left: auto; margin-right: auto; }
+  .hero-actions { justify-content: center; }
+  .hero-visual { order: -1; }
+  .hero-card-float { display: none; }
+  .stats-inner { grid-template-columns: 1fr; gap: 1rem; }
+  .stat-card { padding: 1rem; }
+  .stat-number { font-size: 2.25rem; }
+  .services-grid { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr; }
+  .steps::before { display: none; }
+  .cta-inner { padding: 2.5rem 1.5rem; }
+  .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hero-content { grid-template-columns: 1fr; text-align: center; }
+  .hero-text { max-width: 100%; margin: 0 auto; }
+  .hero-actions { justify-content: center; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-brand-icon">L</div>
+      Lavandería
+    </a>
+    <ul class="nav-links">
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#como-funciona">Cómo funciona</a></li>
+      <li><a href="#precios">Precios</a></li>
+    </ul>
+    <button class="nav-cta">Solicitar recollección</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Servicio disponible hoy
+      </div>
+      <h1>Tu ropa limpia,<br><em>sin moverte</em></h1>
+      <p class="hero-sub">Recolectamos, lavamos y entregamos tu ropa en la puerta de tu casa. Rastrea tu pedido en tiempo real y recibe prendas impecables.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary">Solicitar recollección &rarr;</a>
+        <a href="#como-funciona" class="btn-secondary">Ver cómo funciona</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <div class="hero-card-avatar">M</div>
+          <div>
+            <div class="hero-card-name">María González</div>
+            <div class="hero-card-label">Pedido #LAV-2847</div>
+          </div>
+        </div>
+        <div class="hero-card-divider"></div>
+        <div class="hero-card-item">
+          <span class="hero-card-item-label">Servicio</span>
+          <span class="hero-card-item-value">Lavado + Planchado</span>
+        </div>
+        <div class="hero-card-item">
+          <span class="hero-card-item-label">Cantidad</span>
+          <span class="hero-card-item-value">8 kg</span>
+        </div>
+        <div class="hero-card-item">
+          <span class="hero-card-item-label">Total</span>
+          <span class="hero-card-item-value">$192.00</span>
+        </div>
+        <div class="hero-card-divider"></div>
+        <div class="hero-card-item">
+          <span class="hero-card-item-label">Estado</span>
+          <span class="hero-card-status"><span class="hero-card-status-dot"></span> En proceso</span>
+        </div>
+        <div class="hero-card-float hero-card-float-1">
+          <div class="float-icon float-icon-teal">&#10003;</div>
+          <div><strong>Recolectado</strong><br><span style="color:var(--fg-3);font-size:0.75rem">Hace 2 horas</span></div>
+        </div>
+        <div class="hero-card-float hero-card-float-2">
+          <div class="float-icon float-icon-amber">&#9201;</div>
+          <div><strong>Entrega estimada</strong><br><span style="color:var(--fg-3);font-size:0.75rem">Hoy, 6:00 PM</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat-card">
+      <div class="stat-number">2,400+</div>
+      <div class="stat-label">Clientes satisfechos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">24h</div>
+      <div class="stat-label">Entrega promedio</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">4.9</div>
+      <div class="stat-label">Calificación promedio</div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="services" id="servicios">
+  <div class="services-inner">
+    <div class="section-header">
+      <span class="section-tag">// nuestros servicios</span>
+      <h2>Todo lo que tu ropa necesita</h2>
+      <p>Desde un lavado rápido hasta el planchado perfecto, nos encargamos de cada detalle.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon service-icon-wash">&#128701;</div>
+        <h3>Lavado</h3>
+        <p>Separamos claros y oscuros, usamos detergentes premium y suavizante. Tu ropa sale lista para usar.</p>
+        <div class="service-price">$24/kg <span>/ mínimo 5 kg</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon service-icon-dry">&#9728;</div>
+        <h3>Secado</h3>
+        <p>Secado controlado por temperatura para cada tipo de tela. Sin encogimientos, sin daños.</p>
+        <div class="service-price">$18/kg <span>/ mínimo 3 kg</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon service-icon-iron">&#9875;</div>
+        <h3>Planchado</h3>
+        <p>Planchado profesional con vapor. Camisas, pantalones, sábanas — todo impecable y doblado.</p>
+        <div class="service-price">$32/kg <span>/ mínimo 3 kg</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how-it-works" id="como-funciona">
+  <div class="how-it-works-inner">
+    <div class="section-header">
+      <span class="section-tag">// así funciona</span>
+      <h2>Tres pasos y listo</h2>
+      <p>De tu puerta a nuestras manos y de vuelta a ti. Simple, rápido, sin complicaciones.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Solicita tu recolección</h3>
+        <p>Elige tu servicio, indica la dirección y el horario. Nosotros llegamos a tu puerta.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Nosotros nos encargamos</h3>
+        <p>Tu ropa se lava, seca y plancha con cuidado profesional. Rastrea el progreso en tiempo real.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Recibe en tu puerta</h3>
+        <p>Te entregamos todo limpio, doblado y listo para usar. Sin esperas, sin filas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="precios">
+  <div class="cta-inner">
+    <div class="cta-pattern"></div>
+    <h2>¿Listo para la ropa más limpia de tu vida?</h2>
+    <p>Solicita tu primera recolección hoy y descubre la diferencia de un servicio premium.</p>
+    <button class="btn-primary">Solicitar recollección &rarr;</button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Lavandería</div>
+    <div class="footer-links">
+      <a href="#">Términos</a>
+      <a href="#">Privacidad</a>
+      <a href="#">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

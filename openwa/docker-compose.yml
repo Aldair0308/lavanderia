@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  openwa:
+    image: rmyndharis/openwa:latest
+    container_name: lavanderia-openwa
+    environment:
+      API_KEY: ${OPENWA_API_KEY:-dev-key-change-me}
+      SESSION_ID: ${OPENWA_SESSION_ID:-lavanderia-bot}
+      API_PORT: 2785
+      DASHBOARD_PORT: 2886
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:3100/whatsapp/webhook}
+    ports:
+      - "2785:2785"
+      - "2886:2886"
+    volumes:
+      - openwa-data:/app/sessions
+
+volumes:
+  openwa-data:

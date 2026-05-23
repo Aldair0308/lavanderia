@@ -1,0 +1,115 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lavanderia-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lavanderia
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: lavanderia-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  openwa:
+    image: rmyndharis/openwa:latest
+    container_name: lavanderia-openwa
+    environment:
+      API_KEY: ${OPENWA_API_KEY:-dev-key-change-me}
+      SESSION_ID: ${OPENWA_SESSION_ID:-lavanderia-bot}
+      API_PORT: 2785
+      DASHBOARD_PORT: 2886
+      WEBHOOK_URL: http://api:3100/whatsapp/webhook
+    ports:
+      - "2785:2785"
+      - "2886:2886"
+    volumes:
+      - openwa-data:/app/sessions
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+      target: development
+    container_name: lavanderia-api
+    environment:
+      NODE_ENV: development
+      PORT: 3100
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/lavanderia
+      REDIS_URL: redis://redis:6379
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_API_URL: https://api.deepseek.com
+      DEEPSEEK_MODEL: deepseek-chat
+      OPENWA_API_URL: http://openwa:2785/api
+      OPENWA_API_KEY: ${OPENWA_API_KEY:-dev-key-change-me}
+      OPENWA_SESSION_ID: lavanderia-bot
+      OPENWA_DEV_NUMBER: "5207207538100"
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret}
+      FRONTEND_URL: http://localhost:3000
+      ADMIN_URL: http://localhost:3001
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./apps/api/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ./apps/client
+      dockerfile: Dockerfile
+      target: development
+    container_name: lavanderia-client
+    environment:
+      VITE_API_URL: http://localhost:3100
+      VITE_SUPABASE_URL: ${SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/client/src:/app/src
+
+  admin:
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
+      target: development
+    container_name: lavanderia-admin
+    environment:
+      VITE_API_URL: http://localhost:3100
+      VITE_SUPABASE_URL: ${SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./apps/admin/src:/app/src
+
+volumes:
+  pgdata:
+  openwa-data:

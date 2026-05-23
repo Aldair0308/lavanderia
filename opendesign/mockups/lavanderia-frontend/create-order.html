@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lavandería OS — Solicitar Recolección</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+--bg-1: #FAF8F5; --bg-2: #F2EDE7; --bg-3: #E8E0D5;
+--fg-1: #1C1917; --fg-2: #44403C; --fg-3: #78716C;
+--accent-1: #0D9488; --accent-2: #14B8A6; --accent-3: #99F6E4;
+--warm-1: #D97706; --warm-2: #F59E0B; --warm-3: #FEF3C7;
+--white: #FFFFFF; --border: #D6D3D1;
+--font-display: 'DM Serif Display', Georgia, serif;
+--font-body: 'DM Sans', -apple-system, sans-serif;
+--font-mono: 'JetBrains Mono', monospace;
+--shadow-sm: 0 1px 2px rgba(28,25,23,0.05);
+--shadow-md: 0 4px 12px rgba(28,25,23,0.08);
+--shadow-lg: 0 8px 30px rgba(28,25,23,0.12);
+--radius-sm: 0.5rem; --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg-1); color: var(--fg-1); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+/* ── Nav ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,248,245,0.85); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(214,211,209,0.5);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+}
+.nav-brand {
+  font-family: var(--font-display); font-size: 1.5rem; color: var(--fg-1);
+  text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+}
+.nav-brand-icon {
+  width: 36px; height: 36px; background: var(--accent-1); border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;
+}
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  color: var(--fg-2); text-decoration: none; font-size: 0.9375rem; font-weight: 500;
+  transition: color 0.15s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--accent-1); transition: width 0.2s;
+}
+.nav-links a:hover { color: var(--fg-1); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  background: var(--accent-1); color: white; border: none;
+  padding: 0.625rem 1.25rem; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 0.9375rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.nav-cta:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* ── Page Header ── */
+.page-header {
+  padding: 7rem 1.5rem 2.5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 30% 0%, rgba(13,148,136,0.06) 0%, transparent 60%),
+    var(--bg-1);
+}
+.page-header-inner { max-width: 800px; margin: 0 auto; }
+.breadcrumb {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.875rem; color: var(--fg-3); margin-bottom: 1rem;
+}
+.breadcrumb a { color: var(--fg-3); text-decoration: none; transition: color 0.15s; }
+.breadcrumb a:hover { color: var(--accent-1); }
+.breadcrumb-sep { opacity: 0.4; }
+.breadcrumb-current { color: var(--fg-1); font-weight: 500; }
+.page-header h1 {
+  font-family: var(--font-display); font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.15; margin-bottom: 0.5rem;
+}
+.page-header h1 em { font-style: italic; color: var(--accent-1); }
+.page-header-sub { font-size: 1.0625rem; color: var(--fg-3); }
+
+/* ── Form Container ── */
+.form-container {
+  max-width: 800px; margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* ── Form Section ── */
+.form-section {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  border: 1px solid rgba(214,211,209,0.5);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+.form-section-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+.section-badge {
+  width: 36px; height: 36px; border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-family: var(--font-mono); font-size: 0.875rem;
+  font-weight: 600; flex-shrink: 0;
+}
+.section-title {
+  font-family: var(--font-display); font-size: 1.375rem; line-height: 1.2;
+}
+
+/* ── Form Fields ── */
+.form-group { margin-bottom: 1.25rem; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+  display: block; font-size: 0.875rem; font-weight: 600;
+  color: var(--fg-1); margin-bottom: 0.5rem;
+}
+.form-label-optional { font-weight: 400; color: var(--fg-3); font-size: 0.8125rem; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 0.9375rem; color: var(--fg-1);
+  background: var(--white); transition: all 0.2s; outline: none;
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--fg-3); opacity: 0.6; }
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-select {
+  appearance: none; cursor: pointer; padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2378716C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 20px;
+}
+
+/* ── Radio Cards ── */
+.radio-cards {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.875rem;
+}
+.radio-card {
+  position: relative; cursor: pointer;
+  border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+  padding: 1.25rem; background: var(--white);
+  transition: all 0.25s; display: flex; flex-direction: column;
+  align-items: center; text-align: center; gap: 0.625rem;
+}
+.radio-card:hover { border-color: var(--accent-2); background: rgba(13,148,136,0.02); }
+.radio-card.selected {
+  border-color: var(--accent-1); background: rgba(13,148,136,0.06);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+}
+.radio-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+.radio-card-check {
+  position: absolute; top: 0.625rem; right: 0.625rem;
+  width: 22px; height: 22px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s; font-size: 0.75rem;
+  color: transparent;
+}
+.radio-card.selected .radio-card-check {
+  background: var(--accent-1); border-color: var(--accent-1); color: white;
+}
+.radio-card-icon {
+  width: 48px; height: 48px; border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; transition: all 0.2s;
+}
+.rci-wash { background: #E0F2FE; color: #0284C7; }
+.rci-dry { background: var(--warm-3); color: var(--warm-1); }
+.rci-iron { background: #F3E8FF; color: #9333EA; }
+.rci-full { background: var(--accent-3); color: var(--accent-1); }
+.radio-card.selected .rci-wash { background: #BAE6FD; }
+.radio-card.selected .rci-dry { background: #FDE68A; }
+.radio-card.selected .rci-iron { background: #E9D5FF; }
+.radio-card.selected .rci-full { background: #5EEAD4; }
+.radio-card-name { font-weight: 600; font-size: 0.9375rem; color: var(--fg-1); }
+.radio-card-price {
+  font-family: var(--font-mono); font-size: 0.9375rem;
+  font-weight: 600; color: var(--accent-1);
+}
+.radio-card-price span { font-size: 0.75rem; color: var(--fg-3); font-weight: 400; }
+
+/* ── Quantity Control ── */
+.qty-control {
+  display: flex; align-items: center;
+  border: 1.5px solid var(--border); border-radius: var(--radius-md);
+  width: fit-content; overflow: hidden;
+}
+.qty-btn {
+  width: 44px; height: 44px; border: none; background: var(--bg-2);
+  font-size: 1.25rem; color: var(--fg-1); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-family: var(--font-body); font-weight: 600;
+}
+.qty-btn:hover { background: var(--bg-3); }
+.qty-btn:active { background: var(--accent-3); color: var(--accent-1); }
+.qty-input {
+  width: 70px; height: 44px; border: none;
+  border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border);
+  text-align: center; font-family: var(--font-mono); font-size: 1rem; font-weight: 500;
+  color: var(--fg-1); outline: none; background: var(--white);
+  -moz-appearance: textfield;
+}
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty-hint { font-size: 0.8125rem; color: var(--fg-3); margin-top: 0.375rem; }
+
+/* ── Form Row ── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* ── Summary Card ── */
+.summary-card {
+  background: var(--bg-1); border-radius: var(--radius-lg);
+  padding: 1.75rem; border: 1px solid rgba(214,211,209,0.5);
+}
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.625rem 0; font-size: 0.9375rem;
+}
+.summary-row + .summary-row { border-top: 1px solid rgba(214,211,209,0.4); }
+.summary-label { color: var(--fg-3); }
+.summary-value { font-weight: 600; color: var(--fg-1); }
+.summary-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-top: 1rem; margin-top: 0.5rem; border-top: 2px solid var(--fg-1);
+}
+.summary-total-label { font-size: 1rem; font-weight: 600; color: var(--fg-1); }
+.summary-total-value {
+  font-family: var(--font-display); font-size: 2rem; color: var(--accent-1);
+}
+.summary-total-value span {
+  font-family: var(--font-mono); font-size: 0.875rem; color: var(--fg-3);
+  font-weight: 400; margin-left: 0.25rem;
+}
+.summary-disclaimer {
+  font-size: 0.8125rem; color: var(--fg-3); margin-top: 0.75rem;
+  text-align: center; line-height: 1.5;
+}
+
+/* ── Submit ── */
+.btn-submit {
+  width: 100%; padding: 1rem 2rem;
+  background: var(--accent-1); color: white; border: none;
+  border-radius: var(--radius-md); font-family: var(--font-body);
+  font-size: 1.0625rem; font-weight: 700; cursor: pointer;
+  transition: all 0.25s; margin-top: 1.5rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.btn-submit:hover {
+  background: var(--accent-2); transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(13,148,136,0.3);
+}
+.btn-submit:active { transform: translateY(0); }
+.btn-submit-icon { font-size: 1.25rem; }
+
+/* ── Footer ── */
+.footer {
+  padding: 3rem 1.5rem; background: var(--fg-1); color: rgba(255,255,255,0.6);
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-brand { font-family: var(--font-display); font-size: 1.25rem; color: white; }
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.875rem; }
+.footer-links a:hover { color: white; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .page-header { padding: 5.5rem 1.25rem 1.5rem; }
+  .form-container { padding: 0 1.25rem 3rem; }
+  .form-section { padding: 1.5rem; }
+  .radio-cards { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .radio-card { padding: 1rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+}
+@media (max-width: 400px) {
+  .radio-cards { grid-template-columns: 1fr; }
+  .radio-card { flex-direction: row; text-align: left; gap: 0.875rem; }
+  .radio-card-icon { width: 40px; height: 40px; font-size: 1.25rem; flex-shrink: 0; }
+  .radio-card-info { display: flex; flex-direction: column; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nav-links { gap: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="home.html" class="nav-brand">
+      <div class="nav-brand-icon">L</div>
+      Lavandería
+    </a>
+    <ul class="nav-links">
+      <li><a href="home.html#servicios">Servicios</a></li>
+      <li><a href="home.html#como-funciona">Cómo funciona</a></li>
+      <li><a href="home.html#precios">Precios</a></li>
+    </ul>
+    <button class="nav-cta" onclick="window.location.href='create-order.html'">Solicitar recolección</button>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<section class="page-header">
+  <div class="page-header-inner">
+    <div class="breadcrumb">
+      <a href="home.html">Inicio</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Solicitar recolección</span>
+    </div>
+    <h1>Solicita tu <em>recolección</em></h1>
+    <p class="page-header-sub">Completa los datos y nosotros llegamos a tu puerta. Precio estimado al instante.</p>
+  </div>
+</section>
+
+<!-- Form -->
+<form class="form-container" id="orderForm" onsubmit="return handleSubmit(event)">
+
+  <!-- Section 1: Contact -->
+  <div class="form-section">
+    <div class="form-section-header">
+      <div class="section-badge">1</div>
+      <h2 class="section-title">Datos de contacto</h2>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="fullName">Nombre completo</label>
+      <input class="form-input" type="text" id="fullName" name="fullName" placeholder="Ej. María González Pérez" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="phone">Teléfono</label>
+      <input class="form-input" type="tel" id="phone" name="phone" placeholder="+52 55 1234 5678" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="email">Correo electrónico</label>
+      <input class="form-input" type="email" id="email" name="email" placeholder="maria@ejemplo.com" required />
+    </div>
+  </div>
+
+  <!-- Section 2: Service Type -->
+  <div class="form-section">
+    <div class="form-section-header">
+      <div class="section-badge">2</div>
+      <h2 class="section-title">Tipo de servicio</h2>
+    </div>
+    <div class="radio-cards" id="serviceCards">
+      <label class="radio-card selected" data-price="24" data-name="Lavado" onclick="selectCard(this)">
+        <input type="radio" name="service" value="lavado" checked />
+        <div class="radio-card-check">&#10003;</div>
+        <div class="radio-card-icon rci-wash">&#128701;</div>
+        <div class="radio-card-info">
+          <div class="radio-card-name">Lavado</div>
+          <div class="radio-card-price">$24 <span>/kg</span></div>
+        </div>
+      </label>
+      <label class="radio-card" data-price="18" data-name="Secado" onclick="selectCard(this)">
+        <input type="radio" name="service" value="secado" />
+        <div class="radio-card-check">&#10003;</div>
+        <div class="radio-card-icon rci-dry">&#9728;</div>
+        <div class="radio-card-info">
+          <div class="radio-card-name">Secado</div>
+          <div class="radio-card-price">$18 <span>/kg</span></div>
+        </div>
+      </label>
+      <label class="radio-card" data-price="32" data-name="Planchado" onclick="selectCard(this)">
+        <input type="radio" name="service" value="planchado" />
+        <div class="radio-card-check">&#10003;</div>
+        <div class="radio-card-icon rci-iron">&#9875;</div>
+        <div class="radio-card-info">
+          <div class="radio-card-name">Planchado</div>
+          <div class="radio-card-price">$32 <span>/kg</span></div>
+        </div>
+      </label>
+      <label class="radio-card" data-price="55" data-name="Paquete completo" onclick="selectCard(this)">
+        <input type="radio" name="service" value="completo" />
+        <div class="radio-card-check">&#10003;</div>
+        <div class="radio-card-icon rci-full">&#9733;</div>
+        <div class="radio-card-info">
+          <div class="radio-card-name">Paquete completo</div>
+          <div class="radio-card-price">$55 <span>/kg</span></div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Section 3: Order Details -->
+  <div class="form-section">
+    <div class="form-section-header">
+      <div class="section-badge">3</div>
+      <h2 class="section-title">Detalles del pedido</h2>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="qty">Cantidad (kg)</label>
+      <div class="qty-control">
+        <button type="button" class="qty-btn" onclick="changeQty(-1)">&#8722;</button>
+        <input class="qty-input" type="number" id="qty" name="qty" value="5" min="1" max="50" onchange="updateSummary()" />
+        <button type="button" class="qty-btn" onclick="changeQty(1)">&#43;</button>
+      </div>
+      <div class="qty-hint">Mínimo 1 kg — máximo 50 kg</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="address">Dirección de recolección</label>
+      <textarea class="form-textarea" id="address" name="address" rows="3" placeholder="Calle, número, colonia, C.P.&#10;Ej. Av. Reforma 222, Col. Centro, 06000" required></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="pickupDate">Fecha de recolección</label>
+        <input class="form-input" type="date" id="pickupDate" name="pickupDate" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="timeSlot">Horario de recolección</label>
+        <select class="form-select" id="timeSlot" name="timeSlot" required>
+          <option value="" disabled selected>Selecciona un horario</option>
+          <option value="7am-10am">7:00 AM – 10:00 AM</option>
+          <option value="10am-1pm">10:00 AM – 1:00 PM</option>
+          <option value="1pm-4pm">1:00 PM – 4:00 PM</option>
+          <option value="4pm-7pm">4:00 PM – 7:00 PM</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="notes">Notas adicionales <span class="form-label-optional">(opcional)</span></label>
+      <textarea class="form-textarea" id="notes" name="notes" rows="3" placeholder="Instrucciones especiales, tipo de tela, prendas delicadas…"></textarea>
+    </div>
+  </div>
+
+  <!-- Section 4: Summary -->
+  <div class="form-section">
+    <div class="form-section-header">
+      <div class="section-badge">4</div>
+      <h2 class="section-title">Resumen del pedido</h2>
+    </div>
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Servicio</span>
+        <span class="summary-value" id="summaryService">Lavado</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Cantidad</span>
+        <span class="summary-value" id="summaryQty">5 kg</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Precio por kg</span>
+        <span class="summary-value" id="summaryPrice">$24</span>
+      </div>
+      <div class="summary-total">
+        <span class="summary-total-label">Total estimado</span>
+        <span class="summary-total-value" id="summaryTotal">$120<span>MXN</span></span>
+      </div>
+    </div>
+    <div class="summary-disclaimer">El precio final puede variar según el peso real al momento de la recolección.</div>
+    <button type="submit" class="btn-submit">
+      <span>Confirmar pedido</span>
+      <span class="btn-submit-icon">&#8594;</span>
+    </button>
+  </div>
+
+</form>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Lavandería</div>
+    <div class="footer-links">
+      <a href="#">Términos</a>
+      <a href="#">Privacidad</a>
+      <a href="#">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var dateInput = document.getElementById('pickupDate');
+  var today = new Date();
+  today.setDate(today.getDate() + 1);
+  var yyyy = today.getFullYear();
+  var mm = String(today.getMonth() + 1).padStart(2, '0');
+  var dd = String(today.getDate()).padStart(2, '0');
+  dateInput.min = yyyy + '-' + mm + '-' + dd;
+  dateInput.value = yyyy + '-' + mm + '-' + dd;
+})();
+
+function selectCard(card) {
+  var cards = document.querySelectorAll('.radio-card');
+  cards.forEach(function(c) { c.classList.remove('selected'); });
+  card.classList.add('selected');
+  card.querySelector('input[type="radio"]').checked = true;
+  updateSummary();
+}
+
+function changeQty(delta) {
+  var input = document.getElementById('qty');
+  var val = parseInt(input.value) || 1;
+  val = Math.max(1, Math.min(50, val + delta));
+  input.value = val;
+  updateSummary();
+}
+
+function updateSummary() {
+  var selected = document.querySelector('.radio-card.selected');
+  var price = parseInt(selected.getAttribute('data-price'));
+  var name = selected.getAttribute('data-name');
+  var qty = parseInt(document.getElementById('qty').value) || 1;
+  var total = price * qty;
+  document.getElementById('summaryService').textContent = name;
+  document.getElementById('summaryQty').textContent = qty + ' kg';
+  document.getElementById('summaryPrice').textContent = '$' + price;
+  document.getElementById('summaryTotal').innerHTML = '$' + total + '<span>MXN</span>';
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  var btn = document.querySelector('.btn-submit');
+  btn.textContent = '¡Pedido confirmado!';
+  btn.style.background = '#059669';
+  btn.style.pointerEvents = 'none';
+  setTimeout(function() {
+    btn.innerHTML = '<span>Confirmar pedido</span><span class="btn-submit-icon">&#8594;</span>';
+    btn.style.background = '';
+    btn.style.pointerEvents = '';
+  }, 2500);
+  return false;
+}
+</script>
+
+</body>
+</html>

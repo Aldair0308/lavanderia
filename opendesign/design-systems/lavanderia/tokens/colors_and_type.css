@@ -1,0 +1,106 @@
+/* Lavandería OS Design System — Color & Type Tokens */
+
+:root {
+  /* ── Raw palette ── */
+  --raw-bg-1: #FAF8F5;
+  --raw-bg-2: #F2EDE7;
+  --raw-bg-3: #E8E0D5;
+  --raw-fg-1: #1C1917;
+  --raw-fg-2: #44403C;
+  --raw-fg-3: #78716C;
+  --raw-accent-1: #0D9488;
+  --raw-accent-2: #14B8A6;
+  --raw-accent-3: #99F6E4;
+  --raw-warm-1: #D97706;
+  --raw-warm-2: #F59E0B;
+  --raw-warm-3: #FEF3C7;
+  --raw-white: #FFFFFF;
+  --raw-black: #0A0908;
+  --raw-error: #DC2626;
+  --raw-success: #059669;
+  --raw-border: #D6D3D1;
+
+  /* ── Semantic colors ── */
+  --bg-1: var(--raw-bg-1);
+  --bg-2: var(--raw-bg-2);
+  --bg-3: var(--raw-bg-3);
+  --bg-surface: var(--raw-white);
+  --fg-1: var(--raw-fg-1);
+  --fg-2: var(--raw-fg-2);
+  --fg-3: var(--raw-fg-3);
+  --accent-1: var(--raw-accent-1);
+  --accent-2: var(--raw-accent-2);
+  --accent-3: var(--raw-accent-3);
+  --warm-1: var(--raw-warm-1);
+  --warm-2: var(--raw-warm-2);
+  --warm-3: var(--raw-warm-3);
+  --border-subtle: var(--raw-border);
+  --border-strong: var(--raw-fg-3);
+  --error: var(--raw-error);
+  --success: var(--raw-success);
+
+  /* ── Typography ── */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.75;
+
+  /* ── Spacing scale ── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* ── Radii ── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(28,25,23,0.05);
+  --shadow-md: 0 4px 12px rgba(28,25,23,0.08);
+  --shadow-lg: 0 8px 30px rgba(28,25,23,0.12);
+  --shadow-xl: 0 16px 50px rgba(28,25,23,0.16);
+
+  /* ── Semantic type ── */
+  --h1: var(--text-5xl) / var(--leading-tight) var(--weight-bold) var(--font-display);
+  --h2: var(--text-4xl) / var(--leading-tight) var(--weight-bold) var(--font-display);
+  --h3: var(--text-3xl) / var(--leading-snug) var(--weight-semibold) var(--font-body);
+  --h4: var(--text-2xl) / var(--leading-snug) var(--weight-semibold) var(--font-body);
+  --h5: var(--text-xl) / var(--leading-snug) var(--weight-medium) var(--font-body);
+  --body: var(--text-base) / var(--leading-normal) var(--weight-normal) var(--font-body);
+  --body-lg: var(--text-lg) / var(--leading-normal) var(--weight-normal) var(--font-body);
+  --caption: var(--text-sm) / var(--leading-normal) var(--weight-normal) var(--font-body);
+  --label: var(--text-sm) / var(--leading-snug) var(--weight-medium) var(--font-body);
+  --mono: var(--text-sm) / var(--leading-normal) var(--weight-normal) var(--font-mono);
+}

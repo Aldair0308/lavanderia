@@ -1,0 +1,6 @@
+FROM rmyndharis/openwa:latest
+
+ENV API_PORT=2785
+ENV DASHBOARD_PORT=2886
+
+EXPOSE 2785 2886
