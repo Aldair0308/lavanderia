@@ -1,4 +1,63 @@
 {
   "name": "lavanderia-os",
-  "$schema": "https://railway.app/railway.schema.json"
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": [
+    {
+      "name": "api",
+      "rootDirectory": "apps/api",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "apps/api/Dockerfile",
+        "buildContext": "."
+      },
+      "deploy": {
+        "startCommand": "node apps/api/dist/main.js",
+        "healthcheckPath": "/api/health",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      }
+    },
+    {
+      "name": "client",
+      "rootDirectory": "apps/client",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "apps/client/Dockerfile",
+        "buildContext": "."
+      },
+      "deploy": {
+        "startCommand": "npx serve dist -p $PORT",
+        "healthcheckPath": "/",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      }
+    },
+    {
+      "name": "admin",
+      "rootDirectory": "apps/admin",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "apps/admin/Dockerfile",
+        "buildContext": "."
+      },
+      "deploy": {
+        "startCommand": "npx serve dist -p $PORT",
+        "healthcheckPath": "/",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      }
+    },
+    {
+      "name": "openwa",
+      "rootDirectory": "apps/openwa",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "apps/openwa/Dockerfile"
+      },
+      "deploy": {
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      }
+    }
+  ]
 }
