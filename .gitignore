@@ -12,3 +12,6 @@ codegraph.*.json
 **.node-persist**
 **_IGNORE_**
 # end managed
+nul
+NUL
+*.nul
