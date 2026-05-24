@@ -6,8 +6,8 @@
     "buildContext": "."
   },
   "deploy": {
-    "startCommand": "npx serve dist -p $PORT",
-    "healthcheckPath": "/",
+    "healthcheckPath": "/index.html",
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

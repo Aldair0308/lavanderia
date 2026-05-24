@@ -26,9 +26,8 @@ RUN apk add --no-cache tini
 
 WORKDIR /app
 COPY --from=builder /app/apps/client/dist ./dist
-
-RUN npm i -g serve
+COPY serve-client.js ./
 
 EXPOSE 3000
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "serve dist -p ${PORT:-3000}"]
+CMD ["node", "serve-client.js"]
