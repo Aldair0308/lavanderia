@@ -43,7 +43,7 @@ export class InitSchema1715000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "orders" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "customer_id" uuid NOT NULL,
+        "customerId" uuid NOT NULL,
         "status" "public"."orders_status_enum" NOT NULL,
         "service_type" varchar(255) NOT NULL,
         "quantity_kg" decimal,
@@ -54,19 +54,19 @@ export class InitSchema1715000000000 implements MigrationInterface {
         "total_price" decimal,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_orders" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_orders_customer" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_orders_customer" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE CASCADE
       )
     `);
 
     await queryRunner.query(`
       CREATE TABLE "order_items" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "order_id" uuid NOT NULL,
+        "orderId" uuid NOT NULL,
         "item_type" varchar(255) NOT NULL,
         "quantity" integer NOT NULL,
         "price_per_unit" decimal NOT NULL,
         CONSTRAINT "PK_order_items" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_order_items_order" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_order_items_order" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE
       )
     `);
 
@@ -79,25 +79,25 @@ export class InitSchema1715000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "order_status_history" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "order_id" uuid NOT NULL,
+        "orderId" uuid NOT NULL,
         "from_status" "public"."order_status_history_from_status_enum",
         "to_status" "public"."order_status_history_to_status_enum" NOT NULL,
         "changed_by" varchar(255) NOT NULL,
         "changed_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_order_status_history" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_order_status_history_order" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_order_status_history_order" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE
       )
     `);
 
     await queryRunner.query(`
       CREATE TABLE "whatsapp_conversations" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "customer_id" uuid NOT NULL,
+        "customerId" uuid NOT NULL,
         "is_agent_active" boolean NOT NULL DEFAULT true,
         "needs_human" boolean NOT NULL DEFAULT false,
         "last_message_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_whatsapp_conversations" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_whatsapp_conversations_customer" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_whatsapp_conversations_customer" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE CASCADE
       )
     `);
 
@@ -107,13 +107,13 @@ export class InitSchema1715000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "whatsapp_messages" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "conversation_id" uuid NOT NULL,
+        "conversationId" uuid NOT NULL,
         "direction" "public"."whatsapp_messages_direction_enum" NOT NULL,
         "content" text NOT NULL,
         "is_automated" boolean NOT NULL DEFAULT false,
         "timestamp" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_whatsapp_messages" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_whatsapp_messages_conversation" FOREIGN KEY ("conversation_id") REFERENCES "whatsapp_conversations"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_whatsapp_messages_conversation" FOREIGN KEY ("conversationId") REFERENCES "whatsapp_conversations"("id") ON DELETE CASCADE
       )
     `);
 
@@ -137,13 +137,13 @@ export class InitSchema1715000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "campaign_recipients" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "campaign_id" uuid NOT NULL,
-        "customer_id" uuid NOT NULL,
+        "campaignId" uuid NOT NULL,
+        "customerId" uuid NOT NULL,
         "sent_at" TIMESTAMP,
         "response_received" boolean NOT NULL DEFAULT false,
         CONSTRAINT "PK_campaign_recipients" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_campaign_recipients_campaign" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE CASCADE,
-        CONSTRAINT "FK_campaign_recipients_customer" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_campaign_recipients_campaign" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE,
+        CONSTRAINT "FK_campaign_recipients_customer" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE CASCADE
       )
     `);
 
