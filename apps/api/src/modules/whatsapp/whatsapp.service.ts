@@ -72,7 +72,11 @@ export class WhatsappService {
 
     if (conv.is_agent_active && !conv.needs_human) {
       console.log(`[WhatsappService] Calling agent...`);
-      await this.agentService.processMessage(conv.id, body);
+      try {
+        await this.agentService.processMessage(conv.id, body);
+      } catch (e) {
+        this.logger.error(`Agent reply failed for ${conv.id}: ${(e as Error).message}`);
+      }
     } else {
       console.log(`[WhatsappService] Agent inactive or needs human, skipping auto-reply`);
     }
@@ -80,15 +84,11 @@ export class WhatsappService {
 
   async sendMessage(to: string, text: string, isAutomated = true): Promise<void> {
     const phone = this.normalizePhone(to);
-    try {
-      await axios.post(
-        `${this.openwaUrl}/sendMessage`,
-        { chatId: `${phone}@c.us`, text },
-        { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 15000 },
-      );
-    } catch (e) {
-      this.logger.error(`Failed to send WhatsApp message to ${phone}: ${(e as Error).message}`);
-    }
+    await axios.post(
+      `${this.openwaUrl}/sendMessage`,
+      { chatId: `${phone}@c.us`, text },
+      { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 15000 },
+    );
     const conv = await this.convRepo.findOne({
       where: { customer: { phone_whatsapp: phone } },
       relations: ['customer'],
@@ -147,13 +147,12 @@ export class WhatsappService {
     });
     if (!conv) throw new Error('Conversation not found');
     await this.sendMessage(conv.customer.phone_whatsapp, text, false);
-    const msg = this.msgRepo.create({
-      conversation: conv,
-      direction: MessageDirection.OUTBOUND,
-      content: text,
-      is_automated: false,
+    const msg = await this.msgRepo.findOne({
+      where: { conversation: { id: conversationId } },
+      order: { timestamp: 'DESC' },
     });
-    return this.msgRepo.save(msg);
+    if (!msg) throw new Error('Failed to save message');
+    return msg;
   }
 
   async toggleAgent(conversationId: string, active: boolean): Promise<WhatsappConversation> {
