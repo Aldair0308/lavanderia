@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useAuth } from '../lib/AuthContext';
 
 const navItems = [
   { name: 'Dashboard', path: '/' },
@@ -12,25 +12,22 @@ const navItems = [
 ];
 
 export default function Layout() {
-  const session = useSession();
-  const supabase = useSupabaseClient();
+  const { isAuth, signOut, user } = useAuth();
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (!session) {
+    if (!isAuth) {
       navigate('/login');
     }
-  }, [session, navigate]);
+  }, [isAuth, navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
+  if (!isAuth) return null;
 
   return (
     <div className="flex h-screen bg-gray-100">
       <aside className="w-64 bg-white shadow-md p-4">
         <h2 className="text-xl font-bold mb-6">Lavandería Admin</h2>
+        {user && <p className="text-sm text-gray-500 mb-4">{user.email}</p>}
         <nav className="flex flex-col space-y-2">
           {navItems.map(item => (
             <NavLink
@@ -45,7 +42,7 @@ export default function Layout() {
           ))}
         </nav>
         <button
-          onClick={handleLogout}
+          onClick={() => { signOut(); navigate('/login'); }}
           className="mt-8 w-full py-2 bg-red-500 text-white rounded"
         >
           Cerrar sesión

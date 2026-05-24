@@ -4,12 +4,10 @@ import * as dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
 
-const entitiesPath = path.join(__dirname, '**', '*.entity{.ts,.js}');
-
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/lavanderia',
-  entities: [entitiesPath],
+  entities: [path.join(__dirname, 'entities', '*.{ts,js}')],
   migrations: [path.join(__dirname, 'migrations', '*.{ts,js}')],
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',

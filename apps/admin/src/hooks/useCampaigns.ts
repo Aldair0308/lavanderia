@@ -1,28 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-const apiUrl = (import.meta as any).env.VITE_API_URL;
+import { apiFetch } from '../lib/api';
 
 export const useCampaigns = () => {
   const queryClient = useQueryClient();
 
-  const fetchCampaigns = async () => {
-    const res = await fetch(`${apiUrl}/campaigns`);
-    if (!res.ok) throw new Error('Failed to fetch campaigns');
-    return res.json();
-  };
+  const fetchCampaigns = () => apiFetch('/campaigns');
 
   const { data, error, isLoading } = useQuery({ queryKey: ['campaigns'], queryFn: fetchCampaigns });
 
   const createCampaign = useMutation({
-    mutationFn: async (payload: any) => {
-      const res = await fetch(`${apiUrl}/campaigns`, {
+    mutationFn: async (payload: any) =>
+      apiFetch('/campaigns', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error('Failed to create campaign');
-      return res.json();
-    },
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 
