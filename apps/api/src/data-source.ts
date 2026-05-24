@@ -1,8 +1,9 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as path from 'path';
+import * as dns from 'dns';
 
-// TODO: Load entities dynamically via autoLoadEntities won't work for CLI migrations
-// We need to explicitly list all entities here for migration generation
+dns.setDefaultResultOrder('ipv4first');
+
 const entitiesPath = path.join(__dirname, '**', '*.entity{.ts,.js}');
 
 export const dataSourceOptions: DataSourceOptions = {

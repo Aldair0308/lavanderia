@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as dns from 'dns';
 import { HealthController } from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { CustomersModule } from './modules/customers/customers.module';
@@ -9,6 +10,8 @@ import { WhatsappModule } from './modules/whatsapp/whatsapp.module';
 import { AgentModule } from './modules/agent/agent.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { SettingsModule } from './modules/settings/settings.module';
+
+dns.setDefaultResultOrder('ipv4first');
 
 @Module({
   imports: [
