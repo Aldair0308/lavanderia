@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lavandería OS — Visítanos (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg-1:#FAF8F5;--bg-2:#F2EDE7;--fg-1:#1C1917;--fg-2:#44403C;--fg-3:#78716C;--accent-1:#0D9488;--accent-2:#14B8A6;--warm-1:#D97706;--warm-3:#FEF3C7;--white:#FFF;--border:#D6D3D1;--font-display:'DM Serif Display',Georgia,serif;--font-body:'DM Sans',-apple-system,sans-serif;--font-mono:'JetBrains Mono',monospace;--shadow-md:0 4px 12px rgba(28,25,23,.08);--radius-md:.75rem;--radius-lg:1rem;--radius-xl:1.5rem;--radius-full:9999px}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg-1);color:var(--fg-1);line-height:1.6;-webkit-font-smoothing:antialiased}
+/* A) Home section */
+.visit{padding:5rem 1.5rem;background:var(--white)}
+.visit-inner{max-width:1000px;margin:0 auto}
+.visit-header{text-align:center;margin-bottom:3rem}
+.visit-tag{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-mono);font-size:.75rem;color:var(--accent-1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem}
+.visit-tag svg{width:14px;height:14px}
+.visit-header h2{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.15;margin-bottom:.5rem}
+.visit-header p{font-size:1.0625rem;color:var(--fg-3);max-width:480px;margin:0 auto}
+.visit-card{background:var(--bg-1);border-radius:var(--radius-xl);padding:2.5rem 2rem;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:2rem}
+@media(min-width:768px){.visit-card{flex-direction:row;justify-content:space-between;padding:2.5rem 3rem}}
+.visit-address{display:flex;align-items:flex-start;gap:1rem;flex:1}
+.visit-pin{width:44px;height:44px;background:var(--accent-1);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.visit-pin svg{width:22px;height:22px;color:white}
+.visit-address-text h3{font-family:var(--font-body);font-size:1rem;font-weight:600;margin-bottom:.25rem}
+.visit-address-text p{font-size:.9375rem;color:var(--fg-3);line-height:1.6;max-width:320px}
+.visit-actions{display:flex;gap:.75rem;flex-shrink:0;width:100%}
+@media(min-width:768px){.visit-actions{width:auto}}
+.btn-map{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;border-radius:var(--radius-md);font-family:var(--font-body);font-size:.9375rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .15s ease;flex:1;justify-content:center}
+.btn-map svg{width:20px;height:20px;flex-shrink:0}
+.btn-map:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-maps{background:#4285F4;color:white}
+.btn-maps:hover{background:#3367D6}
+.btn-waze{background:#33CCFF;color:#0B0B0B}
+.btn-waze:hover{background:#29B8E6}
+/* B) Footer */
+.footer-maps-row{display:flex;gap:.5rem;margin-top:.75rem}
+.footer-btn-map{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem .875rem;border-radius:var(--radius-md);font-family:var(--font-body);font-size:.8125rem;font-weight:600;text-decoration:none;transition:opacity .15s;color:white}
+.footer-btn-map svg{width:16px;height:16px}
+.footer-btn-map:hover{opacity:.85}
+.footer-btn-maps{background:#4285F4}
+.footer-btn-waze{background:#33CCFF;color:#0B0B0B}
+/* C) OrderStatus */
+.arrive-card{background:var(--bg-1);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.arrive-text{flex:1;min-width:180px}
+.arrive-text p:first-child{font-size:.9375rem;font-weight:600}
+.arrive-text p:last-child{font-size:.8125rem;color:var(--fg-3)}
+.arrive-actions{display:flex;gap:.5rem}
+.arrive-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 1rem;border-radius:var(--radius-md);font-size:.8125rem;font-weight:600;text-decoration:none;transition:transform .15s}
+.arrive-btn svg{width:18px;height:18px}
+.arrive-btn:hover{transform:translateY(-1px)}
+</style>
+</head>
+<body>
+
+<div style="padding:2rem;text-align:center">
+  <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--fg-3);letter-spacing:.1em;text-transform:uppercase">Open Design Mockup</p>
+  <h1 style="font-family:var(--font-display);font-size:2.5rem;margin:.5rem 0">Variante — Visítanos</h1>
+  <p style="color:var(--fg-3)">Tres componentes de navegaci&oacute;n para el portal de clientes</p>
+</div>
+
+<hr style="border:none;border-top:1px solid var(--border);margin:0 2rem" />
+
+<!-- A) Seccion principal en Home -->
+<section class="visit">
+  <div class="visit-inner">
+    <div class="visit-header">
+      <span class="visit-tag">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+        // ubicaci&oacute;n
+      </span>
+      <h2>Vis&iacute;tanos en persona</h2>
+      <p>Si prefieres pasar directamente, estamos en el coraz&oacute;n de la colonia.</p>
+    </div>
+    <div class="visit-card">
+      <div class="visit-address">
+        <div class="visit-pin">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+        </div>
+        <div class="visit-address-text">
+          <h3>Av. Reforma 123, Col. Ju&aacute;rez</h3>
+          <p>Cuauht&eacute;moc, CDMX &mdash; A dos cuadras del &Aacute;ngel de la Independencia. Abierto de 7:00 a 21:00.</p>
+        </div>
+      </div>
+      <div class="visit-actions">
+        <a href="#" class="btn-map btn-maps" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
+          Google Maps
+        </a>
+        <a href="#" class="btn-map btn-waze" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm8 10c0 4.41-3.59 8-8 8s-8-3.59-8-8 3.59-8 8-8 8 3.59 8 8z" /></svg>
+          Waze
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr style="border:none;border-top:1px solid var(--border);margin:0 2rem" />
+
+<!-- B) Footer variant -->
+<div style="max-width:1000px;margin:3rem auto;padding:0 1.5rem">
+  <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--fg-3);margin-bottom:1rem;text-align:center">// variante footer</p>
+  <div style="background:var(--fg-1);border-radius:var(--radius-lg);padding:2rem;display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:flex-start">
+    <div>
+      <p style="font-family:var(--font-display);color:white;font-size:1.25rem;margin-bottom:.25rem">Lavander&iacute;a OS</p>
+      <p style="font-size:.875rem;color:rgba(255,255,255,.5)">contacto@lavanderia.mx</p>
+    </div>
+    <div>
+      <p style="font-size:.8125rem;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:.5rem">C&oacute;mo llegar</p>
+      <div class="footer-maps-row">
+        <a href="#" class="footer-btn-map footer-btn-maps"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg> Maps</a>
+        <a href="#" class="footer-btn-map footer-btn-waze"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm8 10c0 4.41-3.59 8-8 8s-8-3.59-8-8 3.59-8 8-8 8 3.59 8 8z" /></svg> Waze</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr style="border:none;border-top:1px solid var(--border);margin:0 2rem" />
+
+<!-- C) OrderStatus variant -->
+<div style="max-width:640px;margin:3rem auto;padding:0 1.5rem">
+  <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--fg-3);margin-bottom:1rem;text-align:center">// variante order status (pedido listo)</p>
+  <div class="arrive-card">
+    <div class="arrive-text">
+      <p>Tu pedido est&aacute; listo 🎉</p>
+      <p>Pasa a recogerlo a nuestra sucursal. Te esperamos.</p>
+    </div>
+    <div class="arrive-actions">
+      <a href="#" class="arrive-btn" style="background:#4285F4;color:white"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg> Maps</a>
+      <a href="#" class="arrive-btn" style="background:#33CCFF;color:#0B0B0B"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm8 10c0 4.41-3.59 8-8 8s-8-3.59-8-8 3.59-8 8-8 8 3.59 8 8z" /></svg> Waze</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
