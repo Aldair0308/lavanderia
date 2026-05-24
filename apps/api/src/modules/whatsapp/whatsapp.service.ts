@@ -32,6 +32,7 @@ export class WhatsappService {
   async handleIncoming(payload: any): Promise<void> {
     console.log('[WhatsappService] handleIncoming payload:', JSON.stringify(payload));
     let from = payload.from || '';
+    const remoteJid: string | null = payload.remoteJid || null;
     from = this.normalizePhone(from);
     const body = payload.body || payload.text || '';
     if (!from || !body) {
@@ -44,6 +45,8 @@ export class WhatsappService {
       relations: ['customer'],
     });
 
+    const shouldUpdateJid = remoteJid && (!conv || conv.remote_jid !== remoteJid);
+
     if (!conv) {
       let customer = await this.customersService.findByPhone(from);
       if (!customer) {
@@ -55,8 +58,13 @@ export class WhatsappService {
         this.logger.log(`Created new customer ${customer.id} for phone ${from}`);
       }
       conv = this.convRepo.create({ customer });
+      if (remoteJid) conv.remote_jid = remoteJid;
       conv = await this.convRepo.save(conv);
       this.logger.log(`Created new conversation ${conv.id} for ${customer.name}`);
+    } else if (shouldUpdateJid) {
+      conv.remote_jid = remoteJid;
+      await this.convRepo.save(conv);
+      this.logger.log(`Updated remote_jid for conv ${conv.id}: ${remoteJid}`);
     }
 
     console.log(`[WhatsappService] Conversation ${conv.id} for ${conv.customer.name}`);
@@ -84,15 +92,16 @@ export class WhatsappService {
 
   async sendMessage(to: string, text: string, isAutomated = true): Promise<void> {
     const phone = this.normalizePhone(to);
-    await axios.post(
-      `${this.openwaUrl}/sendMessage`,
-      { chatId: `${phone}@s.whatsapp.net`, text },
-      { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 15000 },
-    );
     const conv = await this.convRepo.findOne({
       where: { customer: { phone_whatsapp: phone } },
       relations: ['customer'],
     });
+    const chatId = conv?.remote_jid || `${phone}@s.whatsapp.net`;
+    await axios.post(
+      `${this.openwaUrl}/sendMessage`,
+      { chatId, text },
+      { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 15000 },
+    );
     if (conv) {
       const msg = this.msgRepo.create({
         conversation: conv,

@@ -123,9 +123,9 @@ async function start() {
     const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
     if (!from || !body) return;
     const phone = from.replace('@s.whatsapp.net', '').replace('@c.us', '').replace(/\D/g, '');
-    console.log(`[Baileys] MSG from ${phone}: ${body.substring(0, 60)}`);
+    console.log(`[Baileys] MSG from ${phone} (jid: ${from}): ${body.substring(0, 60)}`);
     try {
-      await axios.post(WEBHOOK_URL, { from: phone, body, fromMe: false }, {
+      await axios.post(WEBHOOK_URL, { from: phone, body, fromMe: false, remoteJid: from }, {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
         timeout: 60000,
       });
@@ -156,7 +156,9 @@ async function start() {
             if (!chatId || !text) { res.writeHead(400); res.end(JSON.stringify({ error: 'chatId and text required' })); return; }
             if (!sock?.user) { res.writeHead(503); res.end(JSON.stringify({ error: 'Not connected' })); return; }
             const jid = chatId.includes('@') ? chatId : `${chatId}@s.whatsapp.net`;
+            console.log(`[Baileys] SENDING to ${jid}: ${text.substring(0, 60)}`);
             await sock.sendMessage(jid, { text });
+            console.log(`[Baileys] SENT OK to ${jid}`);
             res.writeHead(200); res.end(JSON.stringify({ success: true }));
           } catch (e) { res.writeHead(500); res.end(JSON.stringify({ error: e.message })); }
         });

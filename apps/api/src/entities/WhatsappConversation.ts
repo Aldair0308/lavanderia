@@ -9,6 +9,9 @@ export class WhatsappConversation {
   @ManyToOne(() => Customer, { eager: true })
   customer!: Customer;
 
+  @Column({ type: 'text', nullable: true })
+  remote_jid!: string | null;
+
   @Column({ type: 'boolean', default: true })
   is_agent_active!: boolean;
 
