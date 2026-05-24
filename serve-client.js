@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const distDir = path.join(__dirname, 'apps', 'client', 'dist');
+const distDir = path.join(__dirname, 'dist');
 const port = parseInt(process.env.PORT || '3000', 10);
 
 const MIME_TYPES = {
