@@ -251,7 +251,7 @@ export default function OrderStatus() {
               )}
 
               {/* ── Arrive card when LISTO ── */}
-              {order.status === 'LISTO' && <ArriveCard />}
+              {(order.status === 'LISTO' || order.status === 'COMPLETADO') && <ArriveCard />}
             </div>
           </div>
 

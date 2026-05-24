@@ -1,96 +1,124 @@
+import { STORE, googleMapsUrl, wazeUrl } from '../lib/store-location';
 
-const ADDRESS = 'Av. Reforma 123, Col. Juárez';
-const ADDRESS_FULL = 'Cuauhtémoc, CDMX — A dos cuadras del Ángel de la Independencia';
-const GMAPS_URL = 'https://maps.google.com/maps?q=Av.+Reforma+123,+Col.+Juárez,+CDMX';
-const WAZE_URL = 'https://waze.com/ul?ll=19.4284,-99.1488&navigate=yes';
+// ──────────── Icon primitives ────────────
 
-function MapsIcon({ size = 20 }: { size?: number }) {
+function SvgMaps({ size = 20 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
     </svg>
   );
 }
 
-function WazeIcon({ size = 20 }: { size?: number }) {
+function SvgWaze({ size = 20 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm8 10c0 4.41-3.59 8-8 8s-8-3.59-8-8 3.59-8 8-8 8 3.59 8 8z" />
     </svg>
   );
 }
 
-function PinIcon() {
+function SvgPin({ size = 22 }: { size?: number }) {
   return (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg width={size} height={size} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
     </svg>
   );
 }
 
-function TagIcon() {
+// ──────────── MapLink — polymorphic external link ────────────
+
+type Provider = 'maps' | 'waze';
+
+interface MapLinkProps {
+  provider: Provider;
+  variant?: 'primary' | 'compact' | 'inline';
+  className?: string;
+}
+
+const PROVIDER_META = {
+  maps: {
+    label: 'Google Maps',
+    short: 'Maps',
+    href: googleMapsUrl,
+    icon: SvgMaps,
+    bg: 'bg-[#4285F4]',
+    hover: 'hover:bg-[#3367D6]',
+    text: 'text-white',
+  },
+  waze: {
+    label: 'Waze',
+    short: 'Waze',
+    href: wazeUrl,
+    icon: SvgWaze,
+    bg: 'bg-[#33CCFF]',
+    hover: 'hover:bg-[#29B8E6]',
+    text: 'text-[#0B0B0B]',
+  },
+} as const;
+
+const VARIANT = {
+  primary: 'px-5 py-3 rounded-lg text-sm gap-2',
+  compact: 'px-3.5 py-2 rounded-lg text-xs gap-1.5',
+  inline: 'px-3 py-1.5 rounded-lg text-xs gap-1.5',
+} as const;
+
+export function MapLink({ provider, variant = 'primary', className = '' }: MapLinkProps) {
+  const m = PROVIDER_META[provider];
+  const Icon = m.icon;
+
   return (
-    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-    </svg>
+    <a
+      href={m.href()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${m.bg} ${m.text} ${m.hover} ${VARIANT[variant]}
+        inline-flex items-center justify-center font-semibold no-underline
+        transition-all hover:-translate-y-0.5 hover:shadow-md
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+        focus-visible:ring-offset-white focus-visible:ring-teal-500
+        ${className}`}
+      aria-label={`Abrir ${m.label} con la dirección de la sucursal`}
+    >
+      <Icon size={variant === 'inline' ? 16 : variant === 'compact' ? 18 : 20} />
+      {variant === 'primary' ? m.label : m.short}
+    </a>
   );
 }
 
-/** Full section — for the Home page between How it works and CTA */
+// ──────────── A) VisitSection — Home page hero ────────────
+
 export function VisitSection() {
   return (
-    <section className="bg-white py-20 md:py-28">
+    <section className="bg-white py-20 md:py-28" aria-labelledby="visit-heading">
       <div className="max-w-6xl mx-auto px-5">
-        <div className="text-center mb-14">
+        <header className="text-center mb-14">
           <span className="font-mono text-teal-600 text-xs uppercase tracking-widest inline-flex items-center gap-1.5 mb-3">
-            <TagIcon />// ubicación
+            <SvgPin size={14} />// ubicación
           </span>
-          <h2 className="font-display text-3xl md:text-4xl text-stone-900 mb-2">
+          <h2 id="visit-heading" className="font-display text-3xl md:text-4xl text-stone-900 mb-2">
             Visítanos en persona
           </h2>
-          <p className="text-stone-500 text-lg max-w-lg mx-auto">
+          <p className="text-stone-500 text-lg max-w-lg mx-auto leading-relaxed">
             Si prefieres pasar directamente, estamos en el corazón de la colonia.
           </p>
-        </div>
+        </header>
 
         <div className="bg-cream rounded-2xl border border-border/60 p-8 md:p-12 flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
           <div className="flex items-start gap-4 flex-1">
-            <div className="w-11 h-11 rounded-lg bg-teal-600 flex items-center justify-center flex-shrink-0">
-              <PinIcon />
+            <div className="w-11 h-11 rounded-lg bg-teal-600 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              <SvgPin />
             </div>
             <div>
-              <h3 className="font-body font-semibold text-stone-900 text-base mb-0.5">
-                {ADDRESS}
-              </h3>
-              <p className="text-sm text-stone-500 leading-relaxed">
-                {ADDRESS_FULL} Abierto de 7:00 a 21:00.
-              </p>
+              <h3 className="font-body font-semibold text-stone-900 text-base mb-1">{STORE.address}</h3>
+              <p className="text-sm text-stone-500 leading-relaxed">{STORE.addressFull}. {STORE.hours}.</p>
             </div>
           </div>
 
-          <div className="flex gap-3 w-full md:w-auto">
-            <a
-              href={GMAPS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm no-underline transition-all hover:-translate-y-0.5 hover:shadow-md"
-              style={{ background: '#4285F4', color: 'white' }}
-            >
-              <MapsIcon />
-              Google Maps
-            </a>
-            <a
-              href={WAZE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm no-underline transition-all hover:-translate-y-0.5 hover:shadow-md"
-              style={{ background: '#33CCFF', color: '#0B0B0B' }}
-            >
-              <WazeIcon />
-              Waze
-            </a>
+          <div className="flex gap-3 w-full md:w-auto" role="group" aria-label="Abrir en aplicación de mapas">
+            <MapLink provider="maps" variant="primary" className="flex-1 md:flex-none" />
+            <MapLink provider="waze" variant="primary" className="flex-1 md:flex-none" />
           </div>
         </div>
       </div>
@@ -98,67 +126,29 @@ export function VisitSection() {
   );
 }
 
-/** Compact row for the footer */
+// ──────────── B) FooterMapsRow — compact footer row ────────────
+
 export function FooterMapsRow() {
   return (
-    <div className="flex gap-2 mt-2">
-      <a
-        href={GMAPS_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold no-underline hover:opacity-85 transition-opacity"
-        style={{ background: '#4285F4', color: 'white' }}
-      >
-        <MapsIcon size={16} />
-        Maps
-      </a>
-      <a
-        href={WAZE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold no-underline hover:opacity-85 transition-opacity"
-        style={{ background: '#33CCFF', color: '#0B0B0B' }}
-      >
-        <WazeIcon size={16} />
-        Waze
-      </a>
+    <div className="flex gap-2 mt-3" role="group" aria-label="Cómo llegar">
+      <MapLink provider="maps" variant="inline" />
+      <MapLink provider="waze" variant="inline" />
     </div>
   );
 }
 
-/** Card for OrderStatus when order is LISTO */
+// ──────────── C) ArriveCard — order ready notice ────────────
+
 export function ArriveCard() {
   return (
-    <div className="bg-cream rounded-xl border border-border p-5 flex items-center gap-4 flex-wrap">
+    <div className="bg-cream rounded-xl border border-border p-5 flex items-center gap-4 flex-wrap" role="complementary" aria-label="Instrucciones para recoger tu pedido">
       <div className="flex-1 min-w-[180px]">
-        <p className="text-sm font-semibold text-stone-900">
-          Tu pedido está listo 🎉
-        </p>
-        <p className="text-xs text-stone-500 mt-0.5">
-          Pasa a recogerlo a nuestra sucursal. Te esperamos.
-        </p>
+        <p className="text-sm font-semibold text-stone-900">Tu pedido está listo 🎉</p>
+        <p className="text-xs text-stone-500 mt-0.5">Pasa a recogerlo a nuestra sucursal: {STORE.address}. Te esperamos.</p>
       </div>
       <div className="flex gap-2">
-        <a
-          href={GMAPS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold no-underline transition-transform hover:-translate-y-0.5"
-          style={{ background: '#4285F4', color: 'white' }}
-        >
-          <MapsIcon size={18} />
-          Maps
-        </a>
-        <a
-          href={WAZE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold no-underline transition-transform hover:-translate-y-0.5"
-          style={{ background: '#33CCFF', color: '#0B0B0B' }}
-        >
-          <WazeIcon size={18} />
-          Waze
-        </a>
+        <MapLink provider="maps" variant="compact" />
+        <MapLink provider="waze" variant="compact" />
       </div>
     </div>
   );
