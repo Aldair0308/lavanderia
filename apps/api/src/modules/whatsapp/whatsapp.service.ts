@@ -86,7 +86,7 @@ export class WhatsappService {
     const phone = this.normalizePhone(to);
     await axios.post(
       `${this.openwaUrl}/sendMessage`,
-      { chatId: `${phone}@c.us`, text },
+      { chatId: `${phone}@s.whatsapp.net`, text },
       { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 15000 },
     );
     const conv = await this.convRepo.findOne({
