@@ -6,8 +6,8 @@
     "buildContext": "."
   },
   "deploy": {
-    "startCommand": "/bin/sh -c \"exec node apps/admin/server.mjs\"",
-    "healthcheckPath": "/",
+    "healthcheckPath": "/index.html",
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

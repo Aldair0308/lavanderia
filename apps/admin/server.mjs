@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const distDir = path.join(__dirname, '..', 'dist');
+const distDir = path.join(__dirname, 'dist');
 const port = parseInt(process.env.PORT || '3001', 10);
 
 const MIME_TYPES = {
