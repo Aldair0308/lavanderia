@@ -1,11 +1,11 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { Settings } from '../../entities/Settings';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WhatsappConversation } from '../../entities/WhatsappConversation';
-import { WhatsappService } from '../whatsapp/whatsapp.service';
+import { WhatsappMessage, MessageDirection } from '../../entities/WhatsappMessage';
 import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
@@ -19,12 +19,10 @@ export class AgentService {
     private readonly http: HttpService,
     @InjectRepository(Settings) private readonly settingsRepo: Repository<Settings>,
     @InjectRepository(WhatsappConversation) private readonly convRepo: Repository<WhatsappConversation>,
-    @Inject(forwardRef(() => WhatsappService))
-    private readonly whatsappService: WhatsappService,
+    @InjectRepository(WhatsappMessage) private readonly msgRepo: Repository<WhatsappMessage>,
     private readonly ordersService: OrdersService,
   ) {}
 
-  /** Load all settings */
   private async getSettings(): Promise<Record<string, any>> {
     const all = await this.settingsRepo.find();
     return all.reduce((acc, cur) => {
@@ -37,18 +35,11 @@ export class AgentService {
     }, {} as Record<string, any>);
   }
 
-  /** Mark conversation as needing human */
   private async markNeedsHuman(conv: WhatsappConversation): Promise<void> {
     conv.needs_human = true;
     await this.convRepo.save(conv);
   }
 
-  /** Send reply via WhatsApp */
-  private async sendReply(to: string, text: string): Promise<void> {
-    await this.whatsappService.sendMessage(to, text, true);
-  }
-
-  /** Execute an action defined by the agent */
   private async executeAction(actionObj: any, conv: WhatsappConversation): Promise<string> {
     const { action, data } = actionObj;
     switch (action) {
@@ -102,20 +93,122 @@ export class AgentService {
     }
   }
 
-  /** Main processing method */
-  async processMessage(conversationId: string, incomingText: string): Promise<string> {
-    const conv = await this.convRepo.findOne({ where: { id: conversationId }, relations: ['customer'] });
+  async processBatch(conversationId: string, messages: string[], isNudge: boolean): Promise<string> {
+    const conv = await this.convRepo.findOne({
+      where: { id: conversationId },
+      relations: ['customer'],
+    });
     if (!conv) throw new Error('Conversation not found');
-    const settings = await this.getSettings();
-    this.logger.debug('Processing message', { conversationId, incomingText, settingsKeys: Object.keys(settings) });
 
-    const systemPrompt = `
+    const settings = await this.getSettings();
+    const catalog = settings['services_catalog'] || {};
+
+    const systemPrompt = this.buildSystemPrompt(conv, catalog);
+
+    // Build message history from DB
+    const recentMessages = await this.msgRepo.find({
+      where: { conversation: { id: conversationId } },
+      order: { timestamp: 'ASC' },
+      take: 50,
+    });
+
+    const historyMessages = recentMessages.slice(0, -messages.length).map((m) => ({
+      role: m.direction === MessageDirection.INBOUND ? ('user' as const) : ('assistant' as const),
+      content: m.content,
+    }));
+
+    const userMessages = messages.map((m) => ({
+      role: 'user' as const,
+      content: m,
+    }));
+
+    let userPrompt: string;
+    if (isNudge) {
+      userPrompt = `[SOLICITUD DE RECORDATORIO AMABLE]
+El cliente dijo que enviaría información pero no lo ha hecho aún.
+Genera un recordatorio cordial, como si fueras un vendedor paciente.
+No presiones, solo recuerda que estás al pendiente.
+Usa el contexto de la conversación para personalizar.
+
+Mensajes del cliente en este ciclo:
+${messages.map((m, i) => `${i + 1}. "${m}"`).join('\n')}`;
+    } else {
+      userPrompt = `Mensajes del cliente en este ciclo:
+${messages.map((m, i) => `${i + 1}. "${m}"`).join('\n')}`;
+    }
+
+    const payload = {
+      model: this.deepseekModel,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...historyMessages,
+        ...userMessages,
+        { role: 'user', content: userPrompt },
+      ],
+    };
+
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${this.deepseekKey}` };
+    const response = await firstValueFrom(
+      this.http.post(`${this.deepseekUrl}/chat/completions`, payload, { headers }),
+    );
+    const assistantMsg = response.data?.choices?.[0]?.message?.content?.trim();
+    if (!assistantMsg) return '';
+
+    if (assistantMsg.includes('__ESCALAR__')) {
+      await this.markNeedsHuman(conv);
+      return '__ESCALAR__';
+    }
+
+    try {
+      const parsed = JSON.parse(assistantMsg);
+      if (parsed && parsed.action) {
+        const result = await this.executeAction(parsed, conv);
+        if (result === '__ESCALAR__') return '__ESCALAR__';
+        return result;
+      }
+    } catch {
+      // Not JSON, continue
+    }
+
+    return assistantMsg;
+  }
+
+  private buildSystemPrompt(conv: WhatsappConversation, catalog: any): string {
+    const customerName = conv.customer.name || 'Cliente';
+    const customerPhone = conv.customer.phone_whatsapp || '';
+    const customerAddress = conv.customer.address || 'no registrada';
+
+    return `
 Eres parte del equipo de una lavandería y atiendes el WhatsApp del negocio.
 
+ERES UN SENIOR EN VENTAS con 10+ años de experiencia en atención al cliente y ventas en servicio de lavandería.
+
 PERSONALIDAD:
-- Respondes como una persona real, no como un bot
-- Tono: directo, amable, informal pero respetuoso. Como alguien que conoce al cliente de confianza
-- Español mexicano natural
+- Tomas el tiempo del cliente, nunca lo apresuras
+- Escuchas activamente: reconoces TODO lo que el cliente dijo ANTES de responder
+- Si el cliente ofrece enviar información (dirección, fotos), responde de manera calmada:
+  "Perfecto, quedo al pendiente. Cuando la tengas me avisas y programamos tu entrega."
+- Usas cierres suaves y naturales: "¿Te parece bien mañana en la mañana?"
+- Haces sentir al cliente valorado, no como un número de pedido
+- Eres paciente, amable, y sabes retener clientes sin ser insistente
+
+DATOS DEL CLIENTE:
+- Nombre: ${customerName}
+- Teléfono: ${customerPhone}
+- Dirección guardada: ${customerAddress}
+
+SERVICIO DE RECOLECCIÓN A DOMICILIO:
+- Disponible SOLO en San Mateo Atenco, Estado de México
+- Mínimo 4kg para aplicar
+- Horario de recolección: Lunes a Sábado, 9:00 am - 6:00 pm
+- Precios base: ${JSON.stringify(catalog)}
+- Cuando un cliente muestre interés en recolección a domicilio:
+  1. Pregunta cuántos kilos va a lavar
+  2. Si son 4kg o más, ofrece el servicio de recolección
+  3. Pregunta su dirección (valida que sea zona de cobertura: San Mateo Atenco)
+  4. Pregunta día y horario preferido
+  5. Sugiere un horario estimado de recolección
+  6. Cuando tengas todos los datos, usa create_order para registrar el pedido
 
 REGLAS DE FORMATO — sin excepciones:
 - Máximo 2 a 3 líneas por mensaje
@@ -128,53 +221,6 @@ REGLAS DE FORMATO — sin excepciones:
 CUANDO NO PUEDAS RESOLVER ALGO:
 Responde únicamente con el texto exacto: __ESCALAR__
 Úsalo cuando: el cliente esté molesto, la pregunta sea muy específica de un pedido que no encuentras, o cualquier situación donde necesites a una persona real.
-
-CONTEXTO QUE RECIBIRÁS EN CADA MENSAJE:
-- Datos del cliente (nombre, historial)
-- Últimos 10 mensajes de la conversación
-- Catálogo de servicios y precios actuales
-- Horarios del negocio
-
-ACCIONES DISPONIBLES:
-- create_order
-- get_order_status
-- get_prices
-- request_human
-`;
-
-    const payload = {
-      model: this.deepseekModel,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: incomingText },
-      ],
-    };
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${this.deepseekKey}` };
-    const response = await firstValueFrom(this.http.post(`${this.deepseekUrl}/chat/completions`, payload, { headers }));
-    const assistantMsg = response.data?.choices?.[0]?.message?.content?.trim();
-    if (!assistantMsg) return '';
-
-    // Escalation token
-    if (assistantMsg.includes('__ESCALAR__')) {
-      await this.markNeedsHuman(conv);
-      return '__ESCALAR__';
-    }
-
-    // Try JSON action
-    try {
-      const parsed = JSON.parse(assistantMsg);
-      if (parsed && parsed.action) {
-        const result = await this.executeAction(parsed, conv);
-        if (result === '__ESCALAR__') return '__ESCALAR__';
-        await this.sendReply(conv.customer.phone_whatsapp, result);
-        return result;
-      }
-    } catch (e) {
-      // Not JSON, continue
-    }
-
-    // Plain text reply
-    await this.sendReply(conv.customer.phone_whatsapp, assistantMsg);
-    return assistantMsg;
+`.trim();
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WhatsappConversation } from '../../entities/WhatsappConversation';
@@ -6,9 +6,11 @@ import { WhatsappMessage, MessageDirection } from '../../entities/WhatsappMessag
 import axios from 'axios';
 import { AgentService } from '../agent/agent.service';
 import { CustomersService } from '../customers/customers.service';
+import { WhatsappMessageAnalyzer } from './whatsapp-message-analyzer.service';
+import { WhatsappConversationBuffer } from './whatsapp-conversation-buffer.service';
 
 @Injectable()
-export class WhatsappService {
+export class WhatsappService implements OnModuleInit {
   private readonly logger = new Logger(WhatsappService.name);
   private readonly openwaUrl = process.env.OPENWA_API_URL || '';
   private readonly openwaKey = process.env.OPENWA_API_KEY || '';
@@ -19,7 +21,15 @@ export class WhatsappService {
     @Inject(forwardRef(() => AgentService))
     private readonly agentService: AgentService,
     private readonly customersService: CustomersService,
+    private readonly messageAnalyzer: WhatsappMessageAnalyzer,
+    private readonly conversationBuffer: WhatsappConversationBuffer,
   ) {}
+
+  onModuleInit() {
+    this.conversationBuffer.onBatchReady = async (convId, messages, remoteJid, isNudge) => {
+      await this.processBatch(convId, messages, remoteJid, isNudge);
+    };
+  }
 
   private normalizePhone(raw: string): string {
     let phone = raw.replace('@c.us', '').replace('@s.whatsapp.net', '').replace(/\D/g, '');
@@ -79,15 +89,65 @@ export class WhatsappService {
     await this.convRepo.save(conv);
 
     if (conv.is_agent_active && !conv.needs_human) {
-      console.log(`[WhatsappService] Calling agent...`);
-      try {
-        await this.agentService.processMessage(conv.id, body);
-      } catch (e) {
-        this.logger.error(`Agent reply failed for ${conv.id}: ${(e as Error).message}`);
-      }
+      const analysis = this.messageAnalyzer.analyze(body);
+      console.log(`[WhatsappService] Buffer push (${analysis.category}, delay=${analysis.bufferDelayMs}ms)`);
+      this.conversationBuffer.push(conv.id, conv.remote_jid || `${from}@s.whatsapp.net`, body, analysis);
     } else {
       console.log(`[WhatsappService] Agent inactive or needs human, skipping auto-reply`);
     }
+  }
+
+  private async processBatch(convId: string, messages: string[], remoteJid: string, isNudge: boolean): Promise<void> {
+    const conv = await this.convRepo.findOne({
+      where: { id: convId },
+      relations: ['customer'],
+    });
+    if (!conv) return;
+
+    // Send typing indicator
+    await this.sendTyping(remoteJid, 5_000);
+
+    // Get agent response
+    const reply = await this.agentService.processBatch(convId, messages, isNudge);
+    if (!reply || reply === '__ESCALAR__') return;
+
+    // Simulate human typing time based on response length
+    const typingMs = Math.max(1_000, reply.split(/\s+/).length * 80);
+    await this.sendTyping(remoteJid, typingMs);
+    await this.delay(typingMs);
+
+    // Send the actual message
+    await axios.post(
+      `${this.openwaUrl}/sendMessage`,
+      { chatId: remoteJid, text: reply },
+      { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 15000 },
+    );
+
+    const msg = this.msgRepo.create({
+      conversation: conv,
+      direction: MessageDirection.OUTBOUND,
+      content: reply,
+      is_automated: true,
+    });
+    await this.msgRepo.save(msg);
+    conv.last_message_at = new Date();
+    await this.convRepo.save(conv);
+  }
+
+  private async sendTyping(chatId: string, durationMs: number): Promise<void> {
+    try {
+      await axios.post(
+        `${this.openwaUrl}/typing`,
+        { chatId, duration: durationMs },
+        { headers: { Authorization: `Bearer ${this.openwaKey}` }, timeout: 5000 },
+      );
+    } catch {
+      // Typing indicator is best-effort
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async sendMessage(to: string, text: string, isAutomated = true): Promise<void> {
@@ -155,6 +215,7 @@ export class WhatsappService {
       relations: ['customer'],
     });
     if (!conv) throw new Error('Conversation not found');
+    this.conversationBuffer.flush(conv.id);
     await this.sendMessage(conv.customer.phone_whatsapp, text, false);
     const msg = await this.msgRepo.findOne({
       where: { conversation: { id: conversationId } },

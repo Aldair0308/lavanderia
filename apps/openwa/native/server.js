@@ -180,6 +180,25 @@ async function start() {
           res.end(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sin QR</title><style>body{font-family:system-ui,sans-serif;background:#f5f5f5;display:flex;justify-content:center;align-items:center;min-height:100vh}.card{background:white;border-radius:16px;padding:40px;text-align:center;max-width:420px}h1{font-size:22px;color:#1a1a1a}.status{display:inline-block;padding:8px 20px;border-radius:20px;background:#fff3cd;color:#856404;font-weight:500;margin-top:16px}.refresh{margin-top:16px;font-size:13px;color:#888}</style></head><body><div class="card"><h1>⏳ Generando QR...</h1><p>El c&oacute;digo QR aparecer&aacute; autom&aacute;ticamente cuando est&eacute; listo. Refresca la p&aacute;gina en unos segundos.</p><div class="status">Esperando...</div><div class="refresh">Refrescando autom&aacute;ticamente cada 10s</div><script>setTimeout(()=>location.reload(),10000)</script></div></body></html>`);
         }
 
+      // POST /typing or /api/typing
+      } else if (method === 'POST' && (url === '/typing' || url === '/api/typing')) {
+        let data = '';
+        req.on('data', (c) => data += c);
+        req.on('end', async () => {
+          try {
+            if (req.headers['authorization'] !== `Bearer ${API_KEY}`) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
+            const { chatId, duration } = JSON.parse(data);
+            if (!chatId) { res.writeHead(400); res.end(JSON.stringify({ error: 'chatId required' })); return; }
+            if (!sock?.user) { res.writeHead(503); res.end(JSON.stringify({ error: 'Not connected' })); return; }
+            const jid = chatId.includes('@') ? chatId : `${chatId}@s.whatsapp.net`;
+            await sock.sendPresenceUpdate('composing', jid);
+            if (duration > 0) {
+              setTimeout(() => { sock.sendPresenceUpdate('paused', jid).catch(() => {}); }, Math.min(duration, 20000));
+            }
+            res.writeHead(200); res.end(JSON.stringify({ success: true }));
+          } catch (e) { res.writeHead(500); res.end(JSON.stringify({ error: e.message })); }
+        });
+
       // GET /session-status or /api/session-status
       } else if (method === 'GET' && (url === '/session-status' || url === '/api/session-status')) {
         res.writeHead(200, { 'Content-Type': 'application/json' });

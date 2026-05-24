@@ -1,19 +1,18 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AgentService } from './agent.service';
 import { AgentController } from './agent.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WhatsappConversation } from '../../entities/WhatsappConversation';
+import { WhatsappMessage } from '../../entities/WhatsappMessage';
 import { Settings } from '../../entities/Settings';
 import { OrdersModule } from '../orders/orders.module';
-import { WhatsappModule } from '../whatsapp/whatsapp.module';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([WhatsappConversation, Settings]),
+    TypeOrmModule.forFeature([WhatsappConversation, WhatsappMessage, Settings]),
     OrdersModule,
-    forwardRef(() => WhatsappModule),
   ],
   providers: [AgentService],
   controllers: [AgentController],

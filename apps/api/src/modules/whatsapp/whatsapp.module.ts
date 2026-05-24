@@ -4,6 +4,8 @@ import { WhatsappController } from './whatsapp.controller';
 import { WhatsappService } from './whatsapp.service';
 import { WhatsappConversation } from '../../entities/WhatsappConversation';
 import { WhatsappMessage } from '../../entities/WhatsappMessage';
+import { WhatsappMessageAnalyzer } from './whatsapp-message-analyzer.service';
+import { WhatsappConversationBuffer } from './whatsapp-conversation-buffer.service';
 import { AgentModule } from '../agent/agent.module';
 import { CustomersModule } from '../customers/customers.module';
 import { AuthModule } from '../auth/auth.module';
@@ -15,7 +17,7 @@ import { AuthModule } from '../auth/auth.module';
     CustomersModule,
     AuthModule,
   ],
-  providers: [WhatsappService],
+  providers: [WhatsappService, WhatsappMessageAnalyzer, WhatsappConversationBuffer],
   controllers: [WhatsappController],
   exports: [WhatsappService],
 })
