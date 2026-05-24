@@ -1,55 +1,146 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { apiFetch } from '../lib/api';
+
+interface Customer {
+  id: string;
+  name: string;
+  phone_whatsapp: string;
+}
+
+interface Conversation {
+  id: string;
+  customer: Customer;
+  is_agent_active: boolean;
+  needs_human: boolean;
+  last_message_at: string;
+  last_message: string | null;
+  unread_count: number;
+}
 
 interface Message {
   id: string;
-  from: 'customer' | 'agent';
-  text: string;
-  time: string;
+  direction: 'inbound' | 'outbound';
+  content: string;
+  is_automated: boolean;
+  timestamp: string;
 }
 
-interface Chat {
-  id: string;
-  name: string;
-  phone: string;
-  lastMessage: string;
-  lastTime: string;
-  unread: number;
-  color: string;
+function formatPhone(phone: string): string {
+  if (phone.length === 12 && phone.startsWith('52')) {
+    return `+52 ${phone.slice(2, 4)} ${phone.slice(4, 8)} ${phone.slice(8)}`;
+  }
+  return `+${phone}`;
 }
 
-const mockChats: Chat[] = [
-  { id: '1', name: 'María García', phone: '+52 55 1234 5678', lastMessage: 'Sí, mañana en la mañana está bien', lastTime: '10:32', unread: 2, color: 'bg-teal-600' },
-  { id: '2', name: 'Carlos López', phone: '+52 55 2345 6789', lastMessage: '¿Cuánto tardan en entregar?', lastTime: '09:15', unread: 0, color: 'bg-amber-600' },
-  { id: '3', name: 'Fernanda Ruiz', phone: '+52 55 3456 7890', lastMessage: 'Gracias, quedó perfecto ✨', lastTime: 'Ayer', unread: 0, color: 'bg-violet-600' },
-  { id: '4', name: 'Roberto Torres', phone: '+52 55 4567 8901', lastMessage: 'Claro, recibo el 20% de descuento', lastTime: 'Ayer', unread: 0, color: 'bg-stone-500' },
-];
+function formatTime(ts: string): string {
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  if (sameDay) return d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return 'Ayer';
+  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+}
 
-const mockMessages: Record<string, Message[]> = {
-  '1': [
-    { id: 'm1', from: 'customer', text: 'Hola, ¿tienen disponibilidad para recoger mañana?', time: '09:45' },
-    { id: 'm2', from: 'agent', text: '¡Claro que sí! Tenemos horarios disponibles a partir de las 8am. ¿Prefieres en la mañana o en la tarde?', time: '09:48' },
-    { id: 'm3', from: 'customer', text: 'Sí, mañana en la mañana está bien. Son como 15 piezas, ¿puedo dejarlas en bolsa?', time: '10:30' },
-    { id: 'm4', from: 'agent', text: 'Perfecto. Sí, con bolsa es suficiente. Pasamos entre 8-9am. ¿Confirmamos la dirección de siempre?', time: '10:32' },
-  ],
-};
+function formatMessageTime(ts: string): string {
+  return new Date(ts).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+}
+
+const COLORS = ['bg-teal-600', 'bg-amber-600', 'bg-violet-600', 'bg-stone-500', 'bg-rose-600', 'bg-sky-600', 'bg-lime-600', 'bg-orange-600'];
+
+function getColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return COLORS[Math.abs(hash) % COLORS.length];
+}
+
+function getInitials(name: string): string {
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+}
 
 export default function WhatsApp() {
-  const [activeChat, setActiveChat] = useState<string | null>('1');
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConv, setActiveConv] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [messages, setMessages] = useState<Record<string, Message[]>>(mockMessages);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const active = mockChats.find((c) => c.id === activeChat);
+  const active = conversations.find((c) => c.id === activeConv);
 
-  const sendMessage = () => {
-    if (!newMessage.trim() || !activeChat) return;
-    const msg: Message = {
-      id: `m${Date.now()}`,
-      from: 'agent',
-      text: newMessage.trim(),
-      time: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-    };
-    setMessages((prev) => ({ ...prev, [activeChat]: [...(prev[activeChat] || []), msg] }));
-    setNewMessage('');
+  const loadConversations = useCallback(async () => {
+    try {
+      const data = await apiFetch<Conversation[]>('/whatsapp/conversations');
+      setConversations(data);
+      setError('');
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadMessages = useCallback(async (convId: string) => {
+    try {
+      const data = await apiFetch<Message[]>(`/whatsapp/conversations/${convId}/messages`);
+      setMessages(data);
+    } catch (e: any) {
+      console.error('Failed to load messages:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadConversations();
+    const interval = setInterval(loadConversations, 10000);
+    return () => clearInterval(interval);
+  }, [loadConversations]);
+
+  useEffect(() => {
+    if (activeConv) {
+      loadMessages(activeConv);
+      setConversations((prev) =>
+        prev.map((c) => (c.id === activeConv ? { ...c, unread_count: 0 } : c))
+      );
+    }
+  }, [activeConv, loadMessages]);
+
+  useEffect(() => {
+    if (activeConv) {
+      const interval = setInterval(() => loadMessages(activeConv), 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeConv, loadMessages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !activeConv) return;
+    try {
+      await apiFetch(`/whatsapp/conversations/${activeConv}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ text: newMessage.trim() }),
+      });
+      setNewMessage('');
+      await loadMessages(activeConv);
+    } catch (e: any) {
+      console.error('Failed to send message:', e);
+    }
+  };
+
+  const toggleAgent = async (convId: string, active: boolean) => {
+    try {
+      await apiFetch(`/whatsapp/conversations/${convId}/agent`, {
+        method: 'PATCH',
+        body: JSON.stringify({ active }),
+      });
+      setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, is_agent_active: active, needs_human: active ? false : c.needs_human } : c)));
+    } catch (e: any) {
+      console.error('Failed to toggle agent:', e);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -64,35 +155,50 @@ export default function WhatsApp() {
       {/* Chat list */}
       <div className="w-[340px] flex-shrink-0 border-r border-stone-200 bg-white flex flex-col">
         <div className="p-4 border-b border-stone-100">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-bold text-stone-800 text-sm">Conversaciones</h2>
+            <button onClick={loadConversations} className="text-teal-600 text-xs hover:underline">Actualizar</button>
+          </div>
           <div className="relative">
             <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" placeholder="Buscar conversación..." className="w-full pl-9 pr-3 py-2 text-sm border-1.5 border-stone-300 rounded-md bg-stone-50 outline-none focus:border-teal-600 font-body" />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {mockChats.map((chat) => (
-            <div
-              key={chat.id}
-              onClick={() => setActiveChat(chat.id)}
-              className={`flex gap-3 px-5 py-3.5 cursor-pointer transition-colors border-l-[3px] ${
-                activeChat === chat.id ? 'bg-stone-50 border-l-teal-600' : 'border-l-transparent hover:bg-stone-50'
-              }`}
-            >
-              <div className={`flex h-11 w-11 items-center justify-center rounded-full text-white text-sm font-semibold flex-shrink-0 ${chat.color}`}>
-                {chat.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
+          {loading ? (
+            <div className="flex items-center justify-center py-12 text-stone-400 text-sm">Cargando...</div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12 text-red-500 text-sm px-4 text-center">{error}</div>
+          ) : conversations.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-stone-400 text-sm">Sin conversaciones aún. Espera a que un cliente te escriba.</div>
+          ) : (
+            conversations.map((conv) => (
+              <div
+                key={conv.id}
+                onClick={() => setActiveConv(conv.id)}
+                className={`flex gap-3 px-5 py-3.5 cursor-pointer transition-colors border-l-[3px] ${
+                  activeConv === conv.id ? 'bg-stone-50 border-l-teal-600' : 'border-l-transparent hover:bg-stone-50'
+                }`}
+              >
+                <div className={`flex h-11 w-11 items-center justify-center rounded-full text-white text-sm font-semibold flex-shrink-0 ${getColor(conv.customer.name)}`}>
+                  {getInitials(conv.customer.name)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-base text-stone-900 leading-tight">{conv.customer.name}</div>
+                  <div className="text-xs text-stone-500 truncate mt-0.5">{conv.last_message || 'Sin mensajes'}</div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <div className="text-2xs text-stone-400">{conv.last_message_at ? formatTime(conv.last_message_at) : ''}</div>
+                  {conv.unread_count > 0 && (
+                    <div className="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-teal-600 text-white text-[10px] font-semibold px-1.5 mt-1">{conv.unread_count}</div>
+                  )}
+                  {conv.needs_human && !conv.is_agent_active && (
+                    <div className="text-[10px] text-rose-500 font-semibold mt-1">Requiere atención</div>
+                  )}
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-base text-stone-900 leading-tight">{chat.name}</div>
-                <div className="text-xs text-stone-500 truncate mt-0.5">{chat.lastMessage}</div>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <div className="text-2xs text-stone-400">{chat.lastTime}</div>
-                {chat.unread > 0 && (
-                  <div className="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-teal-600 text-white text-[10px] font-semibold px-1.5 mt-1">{chat.unread}</div>
-                )}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -102,44 +208,64 @@ export default function WhatsApp() {
           {/* Chat header */}
           <div className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-stone-200">
             <div className="flex items-center gap-3">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-full text-white text-xs font-semibold ${active.color}`}>
-                {active.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
+              <div className={`flex h-9 w-9 items-center justify-center rounded-full text-white text-xs font-semibold ${getColor(active.customer.name)}`}>
+                {getInitials(active.customer.name)}
               </div>
               <div>
-                <div className="font-semibold text-lg text-stone-900">{active.name}</div>
-                <div className="text-xs text-emerald-600 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block" /> En línea
-                </div>
+                <div className="font-semibold text-lg text-stone-900">{active.customer.name}</div>
+                {active.needs_human && (
+                  <div className="text-xs text-rose-600 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600 inline-block" /> Requiere atención humana
+                  </div>
+                )}
               </div>
             </div>
-            <span className="font-mono text-xs text-stone-500">{active.phone}</span>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs text-stone-500">{formatPhone(active.customer.phone_whatsapp)}</span>
+              <button
+                onClick={() => toggleAgent(active.id, !active.is_agent_active)}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
+                  active.is_agent_active
+                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                    : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                }`}
+              >
+                {active.is_agent_active ? 'IA Activo' : 'IA Inactivo'}
+              </button>
+            </div>
           </div>
 
-          {/* Agent status */}
-          <div className="flex items-center gap-2 px-6 py-2 bg-teal-50 border-b border-teal-100">
-            <div className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse-dot" />
-            <span className="text-xs font-semibold text-teal-600">Agente IA activo — respondiendo automáticamente</span>
+          {/* Agent status bar */}
+          <div className={`flex items-center gap-2 px-6 py-2 border-b ${active.is_agent_active ? 'bg-teal-50 border-teal-100' : 'bg-stone-100 border-stone-200'}`}>
+            <div className={`w-2 h-2 rounded-full ${active.is_agent_active ? 'bg-emerald-600 animate-pulse-dot' : 'bg-stone-400'}`} />
+            <span className={`text-xs font-semibold ${active.is_agent_active ? 'text-teal-600' : 'text-stone-500'}`}>
+              {active.is_agent_active ? 'Agente IA activo — respondiendo automáticamente' : 'Agente IA desactivado — solo respondes tú'}
+            </span>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
-            <div className="text-center relative mb-2">
-              <span className="relative bg-stone-50 px-3 text-xs text-stone-400">Hoy</span>
-              <div className="absolute left-0 right-0 top-1/2 h-px bg-stone-200 -z-0" />
-            </div>
-            {(messages[active.id] || []).map((msg) => (
-              <div
-                key={msg.id}
-                className={`max-w-[70%] px-4 py-3 rounded-lg text-base leading-relaxed ${
-                  msg.from === 'agent'
-                    ? 'self-end bg-teal-600 text-white rounded-br-sm'
-                    : 'self-start bg-white rounded-bl-sm'
-                }`}
-              >
-                {msg.text}
-                <div className={`text-[11px] mt-1 ${msg.from === 'agent' ? 'text-white/60' : 'text-stone-400'}`}>{msg.time}</div>
-              </div>
-            ))}
+            {messages.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-stone-400 text-sm">No hay mensajes en esta conversación</div>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`max-w-[70%] px-4 py-3 rounded-lg text-base leading-relaxed ${
+                    msg.direction === 'outbound'
+                      ? 'self-end bg-teal-600 text-white rounded-br-sm'
+                      : 'self-start bg-white rounded-bl-sm'
+                  } ${msg.is_automated && msg.direction === 'outbound' ? 'opacity-80' : ''}`}
+                >
+                  {msg.content}
+                  <div className={`text-[11px] mt-1 flex items-center gap-1 ${msg.direction === 'outbound' ? 'text-white/60' : 'text-stone-400'}`}>
+                    {formatMessageTime(msg.timestamp)}
+                    {msg.is_automated && msg.direction === 'outbound' && <span className="text-[10px] opacity-70">· IA</span>}
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
@@ -154,7 +280,8 @@ export default function WhatsApp() {
             />
             <button
               onClick={sendMessage}
-              className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-teal-600 text-white hover:bg-teal-500 transition-colors flex-shrink-0"
+              className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-teal-600 text-white hover:bg-teal-500 transition-colors flex-shrink-0 disabled:opacity-50"
+              disabled={!newMessage.trim()}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>

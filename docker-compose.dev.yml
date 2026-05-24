@@ -30,19 +30,19 @@ services:
       retries: 5
 
   openwa:
-    image: rmyndharis/openwa:latest
+    build:
+      context: ./apps/openwa
+      dockerfile: Dockerfile
     container_name: lavanderia-openwa
     environment:
-      API_KEY: ${OPENWA_API_KEY:-dev-key-change-me}
-      SESSION_ID: ${OPENWA_SESSION_ID:-lavanderia-bot}
-      API_PORT: 2785
-      DASHBOARD_PORT: 2886
-      WEBHOOK_URL: http://api:3100/whatsapp/webhook
+      OPENWA_PORT: 8081
+      OPENWA_API_KEY: ${OPENWA_API_KEY:-dev-key-change-me}
+      WEBHOOK_URL: http://api:3100/api/whatsapp/webhook
+      SESSION_DIR: /app/session-data
     ports:
-      - "2785:2785"
-      - "2886:2886"
+      - "8081:8081"
     volumes:
-      - openwa-data:/app/sessions
+      - openwa-data:/app/session-data
     depends_on:
       - api
 
@@ -63,7 +63,7 @@ services:
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       DEEPSEEK_API_URL: https://api.deepseek.com
       DEEPSEEK_MODEL: deepseek-chat
-      OPENWA_API_URL: http://openwa:2785/api
+      OPENWA_API_URL: http://openwa:8081
       OPENWA_API_KEY: ${OPENWA_API_KEY:-dev-key-change-me}
       OPENWA_SESSION_ID: lavanderia-bot
       OPENWA_DEV_NUMBER: "5207207538100"
