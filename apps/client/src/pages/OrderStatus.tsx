@@ -1,11 +1,7 @@
-import { useState, lazy } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useOrder } from '../hooks/useOrder';
 import { useOrderStatusRealtime } from '../hooks/useOrderStatusRealtime';
-
-const SceneCanvas = lazy(() => import('../components/three/SceneCanvas'));
-const FabricBackground = lazy(() => import('../components/three/FabricBackground'));
-const TimelineOrb = lazy(() => import('../components/three/TimelineOrb'));
 
 const STEPS = [
   { key: 'PENDIENTE', label: 'Pendiente' },
@@ -94,12 +90,7 @@ export default function OrderStatus() {
   return (
     <div className="min-h-screen bg-cream flex flex-col">
       {/* ── Header ── */}
-      <header className="relative bg-gradient-to-b from-warm-gray to-cream pt-20 pb-8 px-4 overflow-hidden">
-        <SceneCanvas className="" fallback={<div />}>
-          <ambientLight intensity={0.3} />
-          <directionalLight position={[2, 3, 4]} intensity={0.5} />
-          <FabricBackground waveSpeed={0.15} waveAmplitude={0.06} segments={20} colorTop="#0D9488" colorBottom="#F2EDE7" />
-        </SceneCanvas>
+      <header className="bg-gradient-to-b from-warm-gray to-cream pt-20 pb-8 px-4">
         <div className="max-w-2xl mx-auto">
           <nav className="font-body text-sm text-stone-500 mb-3">
             <Link to="/" className="hover:text-teal-600 transition-colors">
@@ -151,12 +142,12 @@ export default function OrderStatus() {
               >
                 {isCancelled ? null : (
                   <span className="relative flex h-2.5 w-2.5">
-                    <TimelineOrb
-                      active={true}
-                      completed={false}
-                      position={[0, 0, 0]}
+                    <span
+                      className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${order.status === 'PENDIENTE' ? 'bg-amber-500' : order.status === 'RECOLECTANDO' ? 'bg-blue-500' : 'bg-teal-500'} animate-pulse-dot`}
                     />
-                    <span className="absolute inset-0 rounded-full bg-teal-600 animate-pulse-dot opacity-50" />
+                    <span
+                      className={`relative inline-flex rounded-full h-2.5 w-2.5 ${order.status === 'PENDIENTE' ? 'bg-amber-600' : order.status === 'RECOLECTANDO' ? 'bg-blue-600' : 'bg-teal-600'}`}
+                    />
                   </span>
                 )}
                 {statusLabel(order.status)}

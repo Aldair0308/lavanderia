@@ -1,9 +1,5 @@
 import { Link } from 'react-router-dom';
-import { lazy } from 'react';
 import { useServices } from '../hooks/useServices';
-
-const SceneCanvas = lazy(() => import('../components/three/SceneCanvas'));
-const FabricBackground = lazy(() => import('../components/three/FabricBackground'));
 
 function getGradient(name: string) {
   const n = name.toLowerCase();
@@ -103,13 +99,8 @@ export default function Services() {
   return (
     <div className="min-h-screen bg-cream font-body">
       {/* ── Header ── */}
-      <section className="relative bg-gradient-to-b from-warm-gray to-cream pt-12 pb-10 overflow-hidden">
-        <SceneCanvas className="" fallback={<div />}>
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[2, 4, 3]} intensity={0.6} />
-          <FabricBackground waveSpeed={0.2} waveAmplitude={0.08} segments={24} />
-        </SceneCanvas>
-        <div className="relative max-w-5xl mx-auto px-5">
+      <section className="bg-gradient-to-b from-warm-gray to-cream pt-12 pb-10">
+        <div className="max-w-5xl mx-auto px-5">
           <nav className="flex items-center gap-2 text-sm text-stone-500 mb-6">
             <Link to="/" className="hover:text-teal-600 transition-colors">Inicio</Link>
             <span className="text-border">›</span>
