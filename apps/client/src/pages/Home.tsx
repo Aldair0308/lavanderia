@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+import { lazy } from 'react';
+
+const HeroScene = lazy(() => import('../components/three/HeroScene'));
 
 const services = [
   {
@@ -61,12 +64,8 @@ export default function Home() {
   return (
     <div className="font-body text-stone-900 bg-cream overflow-x-hidden">
       {/* ─── Hero ─── */}
-      <section className="relative min-h-screen flex items-center">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-teal-600/[0.07] rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 -right-20 w-[400px] h-[400px] bg-amber-500/[0.07] rounded-full blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
-        </div>
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        <HeroScene className="" />
 
         <div className="relative max-w-6xl mx-auto px-5 w-full py-12 md:py-0">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">

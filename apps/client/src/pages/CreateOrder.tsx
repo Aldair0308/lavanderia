@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, lazy } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCreateOrder } from '../hooks/useCreateOrder';
 import { useServices } from '../hooks/useServices';
+
+const SceneCanvas = lazy(() => import('../components/three/SceneCanvas'));
+const FabricBackground = lazy(() => import('../components/three/FabricBackground'));
+const ProgressWave = lazy(() => import('../components/three/ProgressWave'));
 
 const orderSchema = z.object({
   customer_name: z.string().min(1, 'Ingresa tu nombre'),
@@ -112,8 +116,14 @@ export default function CreateOrder() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <header className="bg-gradient-to-b from-warm-gray to-cream pt-20 pb-10">
-        <div className="max-w-2xl mx-auto px-4">
+      <header className="relative bg-gradient-to-b from-warm-gray to-cream pt-20 pb-10 overflow-hidden">
+        <SceneCanvas className="" fallback={<div />}>
+          <ambientLight intensity={0.3} />
+          <directionalLight position={[2, 3, 4]} intensity={0.5} />
+          <FabricBackground waveSpeed={0.15} waveAmplitude={0.08} segments={24} colorTop="#0D9488" colorBottom="#FAF8F5" />
+          <ProgressWave progress={0} position={[0, -1.5, 0]} />
+        </SceneCanvas>
+        <div className="relative max-w-2xl mx-auto px-4">
           <nav className="mb-4">
             <ol className="flex items-center text-sm font-body text-stone-500 gap-1">
               <li>
