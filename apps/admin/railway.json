@@ -6,7 +6,7 @@
     "buildContext": "."
   },
   "deploy": {
-    "startCommand": "npx serve dist -p $PORT",
+    "startCommand": "/bin/sh -c \"exec node apps/admin/server.mjs\"",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10

@@ -26,9 +26,8 @@ RUN apk add --no-cache tini
 
 WORKDIR /app
 COPY --from=builder /app/apps/admin/dist ./dist
-
-RUN npm i -g serve
+COPY apps/admin/server.mjs ./
 
 EXPOSE 3001
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "serve dist -p ${PORT:-3001}"]
+CMD ["node", "server.mjs"]
