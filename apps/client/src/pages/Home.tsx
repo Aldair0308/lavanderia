@@ -191,7 +191,10 @@ export default function Home() {
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0">
             {/* Gradient connecting line */}
-            <div className="hidden md:block absolute top-6 left-[calc(16.67%+12px)] right-[calc(16.67%+12px)] h-0.5 bg-gradient-to-r from-teal-600 via-teal-500 to-amber-500 rounded-full" />
+            <div
+              className="hidden md:block absolute top-6 h-0.5 bg-gradient-to-r from-teal-600 via-teal-500 to-amber-500 rounded-full"
+              style={{ left: '24px', right: 'calc(33.333% - 24px)' }}
+            />
 
             {steps.map((step) => (
               <div key={step.number} className="relative text-center md:text-left flex flex-col items-center md:items-start">
