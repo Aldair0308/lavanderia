@@ -28,6 +28,9 @@ WORKDIR /app
 COPY --from=builder /app/apps/admin/dist ./dist
 COPY apps/admin/server.mjs ./
 
+RUN mkdir -p apps/admin
+COPY apps/admin/server.mjs apps/admin/
+
 EXPOSE 3001
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "server.mjs"]
+CMD ["node", "apps/admin/server.mjs"]
