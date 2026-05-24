@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const distDir = path.join(__dirname, 'dist');
+const distDir = path.join(__dirname, 'apps', 'client', 'dist');
 const port = parseInt(process.env.PORT || '3000', 10);
 
 const MIME_TYPES = {
@@ -16,6 +16,8 @@ const MIME_TYPES = {
   '.json': 'application/json',
   '.woff2': 'font/woff2',
 };
+
+console.log(`[CLIENT] Starting. distDir=${distDir}, port=${port}, cwd=${process.cwd()}, __dirname=${__dirname}`);
 
 const server = http.createServer((req, res) => {
   let filePath = path.join(distDir, req.url === '/' ? 'index.html' : req.url);
@@ -31,9 +33,9 @@ const server = http.createServer((req, res) => {
     const content = fs.readFileSync(filePath);
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(content);
-  } catch {
+  } catch (e) {
     res.writeHead(404);
-    res.end('Not found');
+    res.end('Not found: ' + filePath);
   }
 });
 
