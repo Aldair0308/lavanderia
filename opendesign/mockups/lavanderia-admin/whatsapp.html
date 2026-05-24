@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhatsApp — Lavandería OS Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-1:#FAF8F5;--bg-2:#F2EDE7;--bg-3:#E8E0D5;
+  --fg-1:#1C1917;--fg-2:#44403C;--fg-3:#78716C;
+  --accent-1:#0D9488;--accent-2:#14B8A6;--accent-3:#99F6E4;
+  --warm-1:#D97706;--warm-2:#F59E0B;--warm-3:#FEF3C7;
+  --white:#FFFFFF;--border:#D6D3D1;
+  --error:#DC2626;--success:#059669;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --shadow-sm:0 1px 2px rgba(28,25,23,0.05);--shadow-md:0 4px 12px rgba(28,25,23,0.08);
+  --radius-sm:0.375rem;--radius-md:0.75rem;--radius-lg:1rem;--radius-full:9999px;
+  --sidebar-w:260px;--topbar-h:60px;
+}
+html{height:100%}
+body{font-family:var(--font-body);background:var(--bg-1);color:var(--fg-1);line-height:1.6;-webkit-font-smoothing:antialiased;height:100%}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--fg-1);color:var(--bg-1);z-index:50;display:flex;flex-direction:column}
+.sidebar-brand{height:var(--topbar-h);display:flex;align-items:center;gap:0.75rem;padding:0 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+.sidebar-brand-icon{width:36px;height:36px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-family:var(--font-display);font-size:1rem;font-weight:700}
+.sidebar-brand-text{font-family:var(--font-display);font-size:1.1rem}
+.sidebar-nav{flex:1;padding:0.75rem 0}
+.sidebar-section{padding:0.75rem 1.25rem 0.25rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.3)}
+.sidebar-link{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1.25rem;margin:0 0.5rem;border-radius:var(--radius-md);font-size:0.875rem;font-weight:500;color:rgba(250,248,245,0.65);cursor:pointer;transition:all 0.15s}
+.sidebar-link:hover{background:rgba(255,255,255,0.06);color:var(--bg-1)}
+.sidebar-link.active{background:rgba(13,148,136,0.2);color:var(--accent-2)}
+.sidebar-link-badge{margin-left:auto;font-size:0.6875rem;font-weight:600;background:var(--warm-1);color:white;padding:0.125rem 0.5rem;border-radius:var(--radius-full)}
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(250,248,245,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(214,211,209,0.5);z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+.topbar-title{font-family:var(--font-display);font-size:1.25rem}
+.main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+.main-inner{padding:0;max-width:100%;height:calc(100vh - var(--topbar-h));display:flex}
+
+/* Inbox layout */
+.inbox{display:flex;height:100%}
+.chat-list{width:340px;border-right:1px solid var(--border);background:var(--white);display:flex;flex-direction:column;flex-shrink:0}
+.chat-list-header{padding:1rem 1.25rem;border-bottom:1px solid var(--bg-2)}
+.chat-list-search{width:100%;padding:0.5rem 0.75rem 0.5rem 2.25rem;border:1.5px solid var(--border);border-radius:var(--radius-md);font-family:var(--font-body);font-size:0.8125rem;color:var(--fg-1);background:var(--bg-1);outline:none}
+.chat-list-search:focus{border-color:var(--accent-1)}
+.chat-list-search-wrap{position:relative}
+.chat-list-search-wrap svg{position:absolute;left:0.625rem;top:50%;transform:translateY(-50%);color:var(--fg-3)}
+.chat-list-items{flex:1;overflow-y:auto}
+.chat-item{display:flex;gap:0.75rem;padding:0.875rem 1.25rem;cursor:pointer;transition:all 0.15s;border-left:3px solid transparent}
+.chat-item:hover{background:var(--bg-1)}
+.chat-item.active{background:var(--bg-1);border-left-color:var(--accent-1)}
+.chat-avatar{width:44px;height:44px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:white;font-size:0.8125rem;font-weight:600;flex-shrink:0}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-size:0.875rem;font-weight:600;color:var(--fg-1);line-height:1.2}
+.chat-preview{font-size:0.75rem;color:var(--fg-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:0.125rem}
+.chat-meta{text-align:right;flex-shrink:0}
+.chat-time{font-size:0.6875rem;color:var(--fg-3)}
+.chat-unread{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:var(--radius-full);background:var(--accent-1);color:white;font-size:0.625rem;font-weight:600;padding:0 0.375rem;margin-top:0.25rem}
+
+/* Chat area */
+.chat-area{flex:1;display:flex;flex-direction:column;background:var(--bg-1)}
+.chat-area-header{padding:0.875rem 1.5rem;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.chat-contact{display:flex;align-items:center;gap:0.75rem}
+.chat-contact-name{font-weight:600;font-size:0.9375rem}
+.chat-contact-status{font-size:0.75rem;color:var(--success);display:flex;align-items:center;gap:0.25rem}
+.chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.msg{max-width:70%;padding:0.75rem 1rem;border-radius:var(--radius-lg);font-size:0.875rem;line-height:1.5}
+.msg-in{background:var(--white);align-self:flex-start;border-bottom-left-radius:var(--radius-sm)}
+.msg-out{background:var(--accent-1);color:white;align-self:flex-end;border-bottom-right-radius:var(--radius-sm)}
+.msg-meta{font-size:0.6875rem;color:var(--fg-3);margin-top:0.25rem}
+.msg-out .msg-meta{color:rgba(255,255,255,0.6)}
+.msg-divider{text-align:center;font-size:0.75rem;color:var(--fg-3);position:relative}
+.msg-divider::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border)}
+.msg-divider span{position:relative;background:var(--bg-1);padding:0 0.75rem}
+.chat-input-bar{padding:1rem 1.5rem;background:var(--white);border-top:1px solid var(--border);display:flex;gap:0.75rem;align-items:flex-end}
+.chat-input{flex:1;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-family:var(--font-body);font-size:0.875rem;resize:none;outline:none;max-height:100px}
+.chat-input:focus{border-color:var(--accent-1)}
+.chat-send-btn{width:42px;height:42px;border-radius:var(--radius-full);background:var(--accent-1);color:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.chat-send-btn:hover{background:var(--accent-2)}
+
+/* Agent toggle */
+.agent-toggle{display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.75rem;background:var(--accent-3);border-radius:var(--radius-full);font-size:0.75rem;font-weight:600;color:var(--accent-1)}
+.agent-toggle-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:var(--fg-3)}
+.empty-chat-icon{width:64px;height:64px;border-radius:var(--radius-xl);background:var(--bg-2);display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">L</div>
+    <div><div class="sidebar-brand-text">Lavandería</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">Principal</div>
+    <a class="sidebar-link">Dashboard</a>
+    <a class="sidebar-link">Pedidos</a>
+    <a class="sidebar-link">Clientes</a>
+    <div class="sidebar-section">Comunicación</div>
+    <a class="sidebar-link active">WhatsApp<span class="sidebar-link-badge">3</span></a>
+    <a class="sidebar-link">Campañas</a>
+    <div class="sidebar-section">Análisis</div>
+    <a class="sidebar-link">Reportes</a>
+  </nav>
+</aside>
+
+<header class="topbar">
+  <h1 class="topbar-title">WhatsApp</h1>
+  <div class="agent-toggle">
+    <div class="agent-toggle-dot"></div>
+    Agente IA activo
+  </div>
+</header>
+
+<main class="main">
+  <div class="main-inner">
+    <div class="inbox">
+      <!-- Chat list -->
+      <div class="chat-list">
+        <div class="chat-list-header">
+          <div class="chat-list-search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="chat-list-search" type="text" placeholder="Buscar conversación..." />
+          </div>
+        </div>
+        <div class="chat-list-items">
+          <div class="chat-item active">
+            <div class="chat-avatar" style="background:var(--accent-1)">MG</div>
+            <div class="chat-info">
+              <div class="chat-name">María García</div>
+              <div class="chat-preview">Sí, mañana en la mañana está bien</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">10:32</div>
+              <div class="chat-unread">2</div>
+            </div>
+          </div>
+          <div class="chat-item">
+            <div class="chat-avatar" style="background:var(--warm-1)">CL</div>
+            <div class="chat-info">
+              <div class="chat-name">Carlos López</div>
+              <div class="chat-preview">¿Cuánto tardan en entregar?</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">09:15</div>
+            </div>
+          </div>
+          <div class="chat-item">
+            <div class="chat-avatar" style="background:#7C3AED">FR</div>
+            <div class="chat-info">
+              <div class="chat-name">Fernanda Ruiz</div>
+              <div class="chat-preview">Gracias, quedó perfecto ✨</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">Ayer</div>
+            </div>
+          </div>
+          <div class="chat-item">
+            <div class="chat-avatar" style="background:var(--fg-3)">RT</div>
+            <div class="chat-info">
+              <div class="chat-name">Roberto Torres</div>
+              <div class="chat-preview">Claro, recibo el 20% de descuento</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">Ayer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat area -->
+      <div class="chat-area">
+        <div class="chat-area-header">
+          <div class="chat-contact">
+            <div class="chat-avatar" style="background:var(--accent-1);width:36px;height:36px;font-size:0.75rem">MG</div>
+            <div>
+              <div class="chat-contact-name">María García</div>
+              <div class="chat-contact-status"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block"></span> En línea</div>
+            </div>
+          </div>
+          <span style="font-size:0.75rem;color:var(--fg-3);font-family:var(--font-mono)">+52 55 1234 5678</span>
+        </div>
+        <div class="chat-messages">
+          <div class="msg-divider"><span>Hoy</span></div>
+          <div class="msg msg-in">
+            Hola, ¿tienen disponibilidad para recoger mañana?
+            <div class="msg-meta">09:45</div>
+          </div>
+          <div class="msg msg-out">
+            ¡Claro que sí! Tenemos horarios disponibles a partir de las 8am. ¿Prefieres en la mañana o en la tarde?
+            <div class="msg-meta">09:48</div>
+          </div>
+          <div class="msg msg-in">
+            Sí, mañana en la mañana está bien. Son como 15 piezas, ¿puedo dejarlas en bolsa?
+            <div class="msg-meta">10:30</div>
+          </div>
+          <div class="msg msg-out">
+            Perfecto. Sí, con bolsa es suficiente. Pasamos entre 8-9am. ¿Confirmamos la dirección de siempre?
+            <div class="msg-meta">10:32</div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <textarea class="chat-input" placeholder="Escribe un mensaje..." rows="1"></textarea>
+          <button class="chat-send-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

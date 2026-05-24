@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-19T18:30:00.000Z",
+  "generated": "2026-05-23T12:00:00.000Z",
   "sections": [
     {
       "id": "mockups",
@@ -12,6 +12,18 @@
             { "label": "services.html", "path": "opendesign/mockups/lavanderia-frontend/services.html" },
             { "label": "create-order.html", "path": "opendesign/mockups/lavanderia-frontend/create-order.html" },
             { "label": "order-status.html", "path": "opendesign/mockups/lavanderia-frontend/order-status.html" }
+          ]
+        },
+        {
+          "slug": "lavanderia-admin",
+          "files": [
+            { "label": "login.html", "path": "opendesign/mockups/lavanderia-admin/login.html" },
+            { "label": "dashboard.html", "path": "opendesign/mockups/lavanderia-admin/dashboard.html" },
+            { "label": "orders.html", "path": "opendesign/mockups/lavanderia-admin/orders.html" },
+            { "label": "customers.html", "path": "opendesign/mockups/lavanderia-admin/customers.html" },
+            { "label": "whatsapp.html", "path": "opendesign/mockups/lavanderia-admin/whatsapp.html" },
+            { "label": "campaigns.html", "path": "opendesign/mockups/lavanderia-admin/campaigns.html" },
+            { "label": "reports.html", "path": "opendesign/mockups/lavanderia-admin/reports.html" }
           ]
         }
       ]

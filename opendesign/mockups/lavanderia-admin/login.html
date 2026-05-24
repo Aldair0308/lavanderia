@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Iniciar Sesión | Lavandería OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-1: #FAF8F5; --bg-2: #F2EDE7;
+  --fg-1: #1C1917; --fg-2: #44403C; --fg-3: #78716C;
+  --accent-1: #0D9488; --accent-2: #14B8A6; --accent-3: #99F6E4;
+  --warm-1: #D97706; --warm-2: #F59E0B;
+  --white: #FFFFFF; --border: #D6D3D1;
+  --error: #DC2626;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --shadow-md: 0 4px 12px rgba(28,25,23,0.08);
+  --shadow-lg: 0 8px 30px rgba(28,25,23,0.12);
+  --radius-md: 0.75rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+}
+html { height: 100%; }
+body {
+  font-family: var(--font-body); background: var(--bg-1); color: var(--fg-1);
+  line-height: 1.6; -webkit-font-smoothing: antialiased;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 30% 20%, rgba(13,148,136,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(217,119,6,0.05) 0%, transparent 50%);
+}
+.login-wrapper { width: 100%; max-width: 420px; padding: 1.5rem; }
+.login-card {
+  background: var(--white); border-radius: var(--radius-xl);
+  padding: 2.5rem 2rem; box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(214,211,209,0.5);
+}
+.login-brand { text-align: center; margin-bottom: 2rem; }
+.login-brand-icon {
+  width: 48px; height: 48px; margin: 0 auto 0.75rem;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+}
+.login-brand h1 { font-family: var(--font-display); font-size: 1.5rem; color: var(--fg-1); line-height: 1.2; margin-bottom: 0.25rem; }
+.login-brand p { font-size: 0.875rem; color: var(--fg-3); }
+.login-badge {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  background: var(--accent-3); color: var(--accent-1);
+  padding: 0.25rem 0.75rem; border-radius: var(--radius-full);
+  font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;
+}
+.form-group { margin-bottom: 1.25rem; }
+.form-label { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--fg-2); margin-bottom: 0.375rem; }
+.form-input {
+  width: 100%; padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 0.9375rem; color: var(--fg-1);
+  background: var(--bg-1); transition: all 0.2s; outline: none;
+}
+.form-input::placeholder { color: var(--fg-3); opacity: 0.6; }
+.form-input:focus { border-color: var(--accent-1); background: var(--white); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  width: 100%; background: var(--accent-1); color: white;
+  border: none; padding: 0.875rem; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 0.9375rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.login-footer { text-align: center; margin-top: 1.5rem; font-size: 0.8125rem; color: var(--fg-3); }
+.login-footer a { color: var(--accent-1); text-decoration: none; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-icon">L</div>
+      <h1>Lavandería OS</h1>
+      <p>Panel de administración</p>
+      <span class="login-badge">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-1)"></span>
+        Acceso restringido
+      </span>
+    </div>
+    <form>
+      <div class="form-group">
+        <label class="form-label" for="email">Correo electrónico</label>
+        <input class="form-input" id="email" type="email" placeholder="admin@lavanderia.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Contraseña</label>
+        <input class="form-input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-primary" type="submit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Iniciar sesión
+      </button>
+    </form>
+    <div class="login-footer">
+      ¿Olvidaste tu contraseña? <a href="#">Recuperar acceso</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

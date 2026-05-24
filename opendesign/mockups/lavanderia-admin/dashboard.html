@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — Lavandería OS Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-1: #FAF8F5; --bg-2: #F2EDE7; --bg-3: #E8E0D5;
+  --fg-1: #1C1917; --fg-2: #44403C; --fg-3: #78716C;
+  --accent-1: #0D9488; --accent-2: #14B8A6; --accent-3: #99F6E4;
+  --warm-1: #D97706; --warm-2: #F59E0B; --warm-3: #FEF3C7;
+  --white: #FFFFFF; --border: #D6D3D1;
+  --error: #DC2626; --success: #059669;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 2px rgba(28,25,23,0.05);
+  --shadow-md: 0 4px 12px rgba(28,25,23,0.08);
+  --shadow-lg: 0 8px 30px rgba(28,25,23,0.12);
+  --radius-sm: 0.375rem; --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+  --sidebar-w: 260px; --topbar-h: 60px;
+}
+html { height: 100%; }
+body {
+  font-family: var(--font-body); background: var(--bg-1); color: var(--fg-1);
+  line-height: 1.6; -webkit-font-smoothing: antialiased; height: 100%;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w);
+  background: var(--fg-1); color: var(--bg-1); z-index: 50;
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.sidebar-brand {
+  height: var(--topbar-h); display: flex; align-items: center; gap: 0.75rem;
+  padding: 0 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-brand-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-family: var(--font-display); font-size: 1rem; font-weight: 700; flex-shrink: 0;
+}
+.sidebar-brand-text { font-family: var(--font-display); font-size: 1.1rem; line-height: 1.2; }
+.sidebar-brand-sub { font-size: 0.6875rem; color: var(--fg-3); font-family: var(--font-body); }
+.sidebar-nav { flex: 1; padding: 0.75rem 0; }
+.sidebar-section { padding: 0.75rem 1.25rem 0.25rem; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); }
+.sidebar-link {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.625rem 1.25rem; margin: 0 0.5rem; border-radius: var(--radius-md);
+  font-size: 0.875rem; font-weight: 500; color: rgba(250,248,245,0.65);
+  text-decoration: none; transition: all 0.15s; cursor: pointer;
+}
+.sidebar-link:hover { background: rgba(255,255,255,0.06); color: var(--bg-1); }
+.sidebar-link.active { background: rgba(13,148,136,0.2); color: var(--accent-2); }
+.sidebar-link-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sidebar-link-badge {
+  margin-left: auto; font-size: 0.6875rem; font-weight: 600;
+  background: var(--warm-1); color: white; padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+.sidebar-footer {
+  padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 0.625rem;
+}
+.sidebar-avatar {
+  width: 34px; height: 34px; border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+}
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name { font-size: 0.8125rem; font-weight: 600; line-height: 1.2; }
+.sidebar-user-role { font-size: 0.6875rem; color: rgba(255,255,255,0.4); }
+.sidebar-logout {
+  background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer;
+  padding: 4px; border-radius: var(--radius-sm); transition: all 0.15s;
+}
+.sidebar-logout:hover { color: var(--error); background: rgba(220,38,38,0.1); }
+
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: var(--sidebar-w); right: 0; height: var(--topbar-h);
+  background: rgba(250,248,245,0.85); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(214,211,209,0.5); z-index: 40;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem;
+}
+.topbar-title { font-family: var(--font-display); font-size: 1.25rem; color: var(--fg-1); }
+.topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+.topbar-btn {
+  width: 38px; height: 38px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; color: var(--fg-3);
+}
+.topbar-btn:hover { border-color: var(--fg-3); color: var(--fg-1); }
+.topbar-btn-badge {
+  position: relative;
+}
+.topbar-btn-badge::after {
+  content: ''; position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--warm-1);
+  border: 2px solid var(--white);
+}
+
+/* ── Main ── */
+.main {
+  margin-left: var(--sidebar-w); padding-top: var(--topbar-h);
+  min-height: 100vh;
+}
+.main-inner { padding: 2rem; max-width: 1400px; }
+
+/* ── KPI Cards ── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.kpi-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  padding: 1.5rem; box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(214,211,209,0.5);
+  transition: box-shadow 0.2s;
+}
+.kpi-card:hover { box-shadow: var(--shadow-md); }
+.kpi-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.kpi-card-label { font-size: 0.8125rem; font-weight: 500; color: var(--fg-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.kpi-card-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+.kpi-card-icon.teal { background: var(--accent-3); color: var(--accent-1); }
+.kpi-card-icon.amber { background: var(--warm-3); color: var(--warm-1); }
+.kpi-card-icon.emerald { background: #D1FAE5; color: #059669; }
+.kpi-card-icon.violet { background: #EDE9FE; color: #7C3AED; }
+.kpi-card-value {
+  font-family: var(--font-mono); font-size: 1.75rem; font-weight: 700;
+  color: var(--fg-1); line-height: 1.1; margin-bottom: 0.25rem;
+}
+.kpi-card-change {
+  font-size: 0.8125rem; font-weight: 500;
+}
+.kpi-card-change.up { color: var(--success); }
+.kpi-card-change.down { color: var(--warm-1); }
+
+/* ── Content Grid ── */
+.content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; }
+.card {
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm); border: 1px solid rgba(214,211,209,0.5);
+  overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--bg-2);
+}
+.card-title { font-family: var(--font-display); font-size: 1.125rem; color: var(--fg-1); }
+.card-actions { display: flex; gap: 0.5rem; }
+.card-body { padding: 1.25rem 1.5rem; }
+.card-link {
+  font-size: 0.8125rem; font-weight: 600; color: var(--accent-1);
+  text-decoration: none; transition: color 0.15s;
+}
+.card-link:hover { color: var(--accent-2); }
+
+/* ── Table ── */
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--fg-3);
+  text-transform: uppercase; letter-spacing: 0.05em; padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--bg-2);
+}
+.table td {
+  padding: 0.75rem; font-size: 0.875rem; color: var(--fg-1);
+  border-bottom: 1px solid var(--bg-2);
+}
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--bg-1); }
+.badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.1875rem 0.625rem; border-radius: var(--radius-full);
+  font-size: 0.75rem; font-weight: 600;
+}
+.badge-teal { background: var(--accent-3); color: var(--accent-1); }
+.badge-amber { background: var(--warm-3); color: var(--warm-1); }
+.badge-emerald { background: #D1FAE5; color: #059669; }
+.badge-gray { background: var(--bg-2); color: var(--fg-3); }
+
+/* ── Activity list ── */
+.activity-item {
+  display: flex; gap: 0.75rem; padding: 0.75rem 0;
+  border-bottom: 1px solid var(--bg-2);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-avatar {
+  width: 36px; height: 36px; border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+  background: var(--bg-2); color: var(--fg-2);
+}
+.activity-body { flex: 1; min-width: 0; }
+.activity-text { font-size: 0.8125rem; color: var(--fg-1); }
+.activity-meta { font-size: 0.75rem; color: var(--fg-3); margin-top: 0.125rem; }
+
+/* ── Status dot ── */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.green { background: var(--success); }
+.status-dot.amber { background: var(--warm-1); }
+
+@media (max-width: 1200px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .content-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">L</div>
+    <div>
+      <div class="sidebar-brand-text">Lavandería</div>
+      <div class="sidebar-brand-sub">Panel admin</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">Principal</div>
+    <a class="sidebar-link active">
+      <span class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+      Dashboard
+    </a>
+    <a class="sidebar-link">
+      <span class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+      Pedidos
+      <span class="sidebar-link-badge">12</span>
+    </a>
+    <a class="sidebar-link">
+      <span class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      Clientes
+    </a>
+    <div class="sidebar-section">Comunicación</div>
+    <a class="sidebar-link">
+      <span class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+      WhatsApp
+    </a>
+    <a class="sidebar-link">
+      <span class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Campañas
+    </a>
+    <div class="sidebar-section">Análisis</div>
+    <a class="sidebar-link">
+      <span class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+      Reportes
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">AM</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">Ana Martínez</div>
+        <div class="sidebar-user-role">Administradora</div>
+      </div>
+      <button class="sidebar-logout" title="Cerrar sesión">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Topbar -->
+<header class="topbar">
+  <h1 class="topbar-title">Dashboard</h1>
+  <div class="topbar-actions">
+    <button class="topbar-btn topbar-btn-badge" title="Notificaciones">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <button class="topbar-btn" title="Configuración">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="main">
+  <div class="main-inner">
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-card-header">
+          <span class="kpi-card-label">Pedidos hoy</span>
+          <div class="kpi-card-icon teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card-value">24</div>
+        <div class="kpi-card-change up">↑ 12% vs ayer</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-header">
+          <span class="kpi-card-label">Ingresos hoy</span>
+          <div class="kpi-card-icon emerald">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card-value">$4,280</div>
+        <div class="kpi-card-change up">↑ 8% vs ayer</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-header">
+          <span class="kpi-card-label">Pendientes</span>
+          <div class="kpi-card-icon amber">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card-value">7</div>
+        <div class="kpi-card-change down">3 urgentes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-header">
+          <span class="kpi-card-label">Clientes activos</span>
+          <div class="kpi-card-icon violet">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card-value">183</div>
+        <div class="kpi-card-change up">↑ 5 este mes</div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Recent Orders Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Pedidos recientes</h2>
+          <a class="card-link" href="#">Ver todos →</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Estado</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--accent-1);font-weight:600">#1042</td>
+                <td>María García</td>
+                <td>Lavado + Planchado</td>
+                <td><span class="badge badge-teal">En proceso</span></td>
+                <td style="font-family:var(--font-mono);font-weight:600">$245</td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--accent-1);font-weight:600">#1041</td>
+                <td>Carlos López</td>
+                <td>Solo lavado</td>
+                <td><span class="badge badge-emerald">Listo</span></td>
+                <td style="font-family:var(--font-mono);font-weight:600">$120</td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--accent-1);font-weight:600">#1040</td>
+                <td>Fernanda Ruiz</td>
+                <td>Planchado premium</td>
+                <td><span class="badge badge-amber">Pendiente</span></td>
+                <td style="font-family:var(--font-mono);font-weight:600">$180</td>
+              </tr>
+              <tr>
+                <td style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--accent-1);font-weight:600">#1039</td>
+                <td>Pedro Hernández</td>
+                <td>Servicio completo</td>
+                <td><span class="badge badge-teal">En proceso</span></td>
+                <td style="font-family:var(--font-mono);font-weight:600">$350</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Actividad reciente</h2>
+        </div>
+        <div class="card-body">
+          <div class="activity-item">
+            <div class="activity-avatar" style="background:var(--accent-3);color:var(--accent-1)">MG</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>María García</strong> solicitó una recolección</div>
+              <div class="activity-meta">Hace 10 minutos</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar" style="background:var(--warm-3);color:var(--warm-1)">CL</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Carlos López</strong> confirmó entrega</div>
+              <div class="activity-meta">Hace 25 minutos</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar" style="background:#D1FAE5;color:#059669">FR</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Fernanda Ruiz</strong> calificó con 5 ★</div>
+              <div class="activity-meta">Hace 1 hora</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar" style="background:#EDE9FE;color:#7C3AED">PH</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>WhatsApp agente</strong> respondió 3 consultas</div>
+              <div class="activity-meta">Hace 2 horas</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar" style="background:var(--bg-2);color:var(--fg-3)">LC</div>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Laura Castillo</strong> — pedido #1038 entregado</div>
+              <div class="activity-meta">Hace 3 horas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

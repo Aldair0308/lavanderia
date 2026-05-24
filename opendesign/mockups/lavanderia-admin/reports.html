@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reportes — Lavandería OS Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-1:#FAF8F5;--bg-2:#F2EDE7;--bg-3:#E8E0D5;
+  --fg-1:#1C1917;--fg-2:#44403C;--fg-3:#78716C;
+  --accent-1:#0D9488;--accent-2:#14B8A6;--accent-3:#99F6E4;
+  --warm-1:#D97706;--warm-2:#F59E0B;--warm-3:#FEF3C7;
+  --white:#FFFFFF;--border:#D6D3D1;
+  --error:#DC2626;--success:#059669;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --shadow-sm:0 1px 2px rgba(28,25,23,0.05);--shadow-md:0 4px 12px rgba(28,25,23,0.08);
+  --radius-sm:0.375rem;--radius-md:0.75rem;--radius-lg:1rem;--radius-full:9999px;
+  --sidebar-w:260px;--topbar-h:60px;
+}
+html{height:100%}
+body{font-family:var(--font-body);background:var(--bg-1);color:var(--fg-1);line-height:1.6;-webkit-font-smoothing:antialiased;height:100%}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--fg-1);color:var(--bg-1);z-index:50;display:flex;flex-direction:column}
+.sidebar-brand{height:var(--topbar-h);display:flex;align-items:center;gap:0.75rem;padding:0 1.25rem;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+.sidebar-brand-icon{width:36px;height:36px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-family:var(--font-display);font-size:1rem;font-weight:700}
+.sidebar-brand-text{font-family:var(--font-display);font-size:1.1rem}
+.sidebar-nav{flex:1;padding:0.75rem 0}
+.sidebar-section{padding:0.75rem 1.25rem 0.25rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.3)}
+.sidebar-link{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1.25rem;margin:0 0.5rem;border-radius:var(--radius-md);font-size:0.875rem;font-weight:500;color:rgba(250,248,245,0.65);cursor:pointer;transition:all 0.15s}
+.sidebar-link:hover{background:rgba(255,255,255,0.06);color:var(--bg-1)}
+.sidebar-link.active{background:rgba(13,148,136,0.2);color:var(--accent-2)}
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(250,248,245,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(214,211,209,0.5);z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+.topbar-title{font-family:var(--font-display);font-size:1.25rem}
+.main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+.main-inner{padding:2rem;max-width:1400px}
+
+/* Period selector */
+.period-selector{display:flex;gap:0.25rem;margin-bottom:1.5rem;background:var(--white);border-radius:var(--radius-md);padding:0.25rem;width:fit-content;border:1px solid var(--border)}
+.period-btn{padding:0.5rem 1rem;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.8125rem;font-weight:500;color:var(--fg-3);background:transparent;border:none;cursor:pointer;transition:all 0.15s}
+.period-btn:hover{color:var(--fg-1)}
+.period-btn.active{background:var(--accent-1);color:white}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.kpi-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:var(--shadow-sm);border:1px solid rgba(214,211,209,0.5)}
+.kpi-label{font-size:0.75rem;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.25rem}
+.kpi-value{font-family:var(--font-mono);font-size:1.75rem;font-weight:700;color:var(--fg-1);line-height:1.1}
+.kpi-change{font-size:0.75rem;margin-top:0.25rem}
+.kpi-change.up{color:var(--success)}
+.kpi-change.down{color:var(--warm-1)}
+
+/* Charts grid */
+.reports-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem}
+.card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);border:1px solid rgba(214,211,209,0.5);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bg-2)}
+.card-title{font-family:var(--font-display);font-size:1.125rem}
+.card-body{padding:1.25rem 1.5rem}
+
+/* Bar chart placeholder */
+.chart-placeholder{display:flex;align-items:flex-end;gap:1.5rem;height:200px;padding-top:1rem}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.5rem;height:100%}
+.bar{width:100%;max-width:48px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;transition:height 0.3s}
+.bar.teal{background:var(--accent-1)}
+.bar.amber{background:var(--warm-1)}
+.bar-label{font-size:0.6875rem;color:var(--fg-3);font-weight:500}
+.bar-value{font-family:var(--font-mono);font-size:0.6875rem;color:var(--fg-2);font-weight:600}
+
+/* Top list */
+.top-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--bg-2)}
+.top-item:last-child{border-bottom:none}
+.top-rank{width:28px;height:28px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0}
+.top-rank.gold{background:var(--warm-3);color:var(--warm-1)}
+.top-rank.silver{background:var(--bg-2);color:var(--fg-3)}
+.top-rank.bronze{background:var(--bg-3);color:var(--warm-1)}
+.top-body{flex:1;min-width:0}
+.top-name{font-size:0.875rem;font-weight:500;color:var(--fg-1)}
+.top-detail{font-size:0.75rem;color:var(--fg-3)}
+.top-value{font-family:var(--font-mono);font-size:0.875rem;font-weight:600;color:var(--fg-1)}
+
+/* Service breakdown */
+.service-row{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0}
+.service-color{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.service-name{flex:1;font-size:0.8125rem;color:var(--fg-1)}
+.service-pct{font-family:var(--font-mono);font-size:0.8125rem;font-weight:600;color:var(--fg-2)}
+.service-bar-bg{flex:1;height:6px;background:var(--bg-2);border-radius:3px;overflow:hidden}
+.service-bar-fill{height:100%;border-radius:3px}
+
+.btn-ghost{padding:0.5rem 0.875rem;border:1.5px solid var(--border);border-radius:var(--radius-md);font-family:var(--font-body);font-size:0.8125rem;font-weight:500;color:var(--fg-2);background:var(--white);cursor:pointer;transition:all 0.15s}
+.btn-ghost:hover{border-color:var(--accent-1);color:var(--accent-1)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand"><div class="sidebar-brand-icon">L</div><div><div class="sidebar-brand-text">Lavandería</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">Principal</div>
+    <a class="sidebar-link">Dashboard</a>
+    <a class="sidebar-link">Pedidos</a>
+    <a class="sidebar-link">Clientes</a>
+    <div class="sidebar-section">Comunicación</div>
+    <a class="sidebar-link">WhatsApp</a>
+    <a class="sidebar-link">Campañas</a>
+    <div class="sidebar-section">Análisis</div>
+    <a class="sidebar-link active">Reportes</a>
+  </nav>
+</aside>
+
+<header class="topbar">
+  <h1 class="topbar-title">Reportes</h1>
+  <button class="btn-ghost">Exportar CSV</button>
+</header>
+
+<main class="main">
+  <div class="main-inner">
+
+    <div class="period-selector">
+      <button class="period-btn">7d</button>
+      <button class="period-btn active">30d</button>
+      <button class="period-btn">3m</button>
+      <button class="period-btn">12m</button>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Ingresos totales</div>
+        <div class="kpi-value">$18,450</div>
+        <div class="kpi-change up">↑ 15% vs periodo anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pedidos</div>
+        <div class="kpi-value">142</div>
+        <div class="kpi-change up">↑ 8% vs periodo anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ticket promedio</div>
+        <div class="kpi-value">$130</div>
+        <div class="kpi-change up">↑ 5% vs periodo anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Clientes nuevos</div>
+        <div class="kpi-value">23</div>
+        <div class="kpi-change down">↓ 3 vs periodo anterior</div>
+      </div>
+    </div>
+
+    <div class="reports-grid">
+      <!-- Revenue chart -->
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Ingresos por semana</h2></div>
+        <div class="card-body">
+          <div class="chart-placeholder">
+            <div class="bar-group"><div class="bar teal" style="height:35%"></div><div class="bar-value">$2,100</div><div class="bar-label">S1</div></div>
+            <div class="bar-group"><div class="bar teal" style="height:55%"></div><div class="bar-value">$3,420</div><div class="bar-label">S2</div></div>
+            <div class="bar-group"><div class="bar teal" style="height:80%"></div><div class="bar-value">$5,100</div><div class="bar-label">S3</div></div>
+            <div class="bar-group"><div class="bar amber" style="height:60%"></div><div class="bar-value">$3,880</div><div class="bar-label">S4</div></div>
+            <div class="bar-group"><div class="bar teal" style="height:65%"></div><div class="bar-value">$3,950</div><div class="bar-label">Actual</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service breakdown -->
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Servicios</h2></div>
+        <div class="card-body">
+          <div class="service-row">
+            <div class="service-color" style="background:var(--accent-1)"></div>
+            <span class="service-name">Lavado + Planchado</span>
+            <span class="service-pct">42%</span>
+          </div>
+          <div class="service-bar-bg"><div class="service-bar-fill" style="width:42%;background:var(--accent-1)"></div></div>
+          <div class="service-row">
+            <div class="service-color" style="background:var(--warm-1)"></div>
+            <span class="service-name">Solo lavado</span>
+            <span class="service-pct">28%</span>
+          </div>
+          <div class="service-bar-bg"><div class="service-bar-fill" style="width:28%;background:var(--warm-1)"></div></div>
+          <div class="service-row">
+            <div class="service-color" style="background:#7C3AED"></div>
+            <span class="service-name">Planchado premium</span>
+            <span class="service-pct">18%</span>
+          </div>
+          <div class="service-bar-bg"><div class="service-bar-fill" style="width:18%;background:#7C3AED"></div></div>
+          <div class="service-row">
+            <div class="service-color" style="background:var(--fg-3)"></div>
+            <span class="service-name">Servicio completo</span>
+            <span class="service-pct">12%</span>
+          </div>
+          <div class="service-bar-bg"><div class="service-bar-fill" style="width:12%;background:var(--fg-3)"></div></div>
+        </div>
+      </div>
+
+      <!-- Top customers -->
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Top clientes</h2></div>
+        <div class="card-body">
+          <div class="top-item">
+            <div class="top-rank gold">1</div>
+            <div class="top-body">
+              <div class="top-name">Fernanda Ruiz</div>
+              <div class="top-detail">15 pedidos</div>
+            </div>
+            <div class="top-value">$3,600</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank silver">2</div>
+            <div class="top-body">
+              <div class="top-name">María García</div>
+              <div class="top-detail">12 pedidos</div>
+            </div>
+            <div class="top-value">$2,840</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank bronze">3</div>
+            <div class="top-body">
+              <div class="top-name">Pedro Hernández</div>
+              <div class="top-detail">10 pedidos</div>
+            </div>
+            <div class="top-value">$2,500</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank silver">4</div>
+            <div class="top-body">
+              <div class="top-name">Diego Ramírez</div>
+              <div class="top-detail">9 pedidos</div>
+            </div>
+            <div class="top-value">$1,980</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank silver">5</div>
+            <div class="top-body">
+              <div class="top-name">Laura Castillo</div>
+              <div class="top-detail">8 pedidos</div>
+            </div>
+            <div class="top-value">$1,620</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retention -->
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Retención</h2></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem">
+            <div style="text-align:center">
+              <div style="font-family:var(--font-display);font-size:2.25rem;color:var(--accent-1);line-height:1">76%</div>
+              <div style="font-size:0.75rem;color:var(--fg-3)">Tasa de retención</div>
+            </div>
+            <div style="flex:1">
+              <div class="service-row" style="padding:0.375rem 0">
+                <span class="service-name" style="font-size:0.75rem">Clientes recurrentes</span>
+                <span class="service-pct" style="font-size:0.75rem">76%</span>
+              </div>
+              <div class="service-bar-bg"><div class="service-bar-fill" style="width:76%;background:var(--success)"></div></div>
+              <div class="service-row" style="padding:0.375rem 0">
+                <span class="service-name" style="font-size:0.75rem;color:var(--warm-1)">En riesgo (&gt;30d)</span>
+                <span class="service-pct" style="font-size:0.75rem;color:var(--warm-1)">18%</span>
+              </div>
+              <div class="service-bar-bg"><div class="service-bar-fill" style="width:18%;background:var(--warm-1)"></div></div>
+              <div class="service-row" style="padding:0.375rem 0">
+                <span class="service-name" style="font-size:0.75rem;color:var(--error)">Perdidos (&gt;90d)</span>
+                <span class="service-pct" style="font-size:0.75rem;color:var(--error)">6%</span>
+              </div>
+              <div class="service-bar-bg"><div class="service-bar-fill" style="width:6%;background:var(--error)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
