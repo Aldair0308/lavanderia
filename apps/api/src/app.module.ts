@@ -11,14 +11,28 @@ import { AgentModule } from './modules/agent/agent.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { SettingsModule } from './modules/settings/settings.module';
 
-dns.setDefaultResultOrder('ipv4first');
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {
+  // Node < 17 fallback
+}
+
+function forceIpv4(url: string | undefined): string | undefined {
+  if (url && url.includes('supabase.co')) {
+    return url.replace(
+      /@([^:]+)\.supabase\.co/,
+      '@104.18.38.10'
+    );
+  }
+  return url;
+}
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '../../.env' }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/lavanderia',
+      url: forceIpv4(process.env.DATABASE_URL) || 'postgresql://postgres:postgres@localhost:5432/lavanderia',
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
