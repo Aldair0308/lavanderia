@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useOrder } from '../hooks/useOrder';
 import { useOrderStatusRealtime } from '../hooks/useOrderStatusRealtime';
+import { ArriveCard, FooterMapsRow } from '../components/VisitMaps';
 
 const STEPS = [
   { key: 'PENDIENTE', label: 'Pendiente' },
@@ -248,6 +249,9 @@ export default function OrderStatus() {
                   })}
                 </ol>
               )}
+
+              {/* ── Arrive card when LISTO ── */}
+              {order.status === 'LISTO' && <ArriveCard />}
             </div>
           </div>
 
@@ -375,6 +379,9 @@ export default function OrderStatus() {
           <p className="font-body text-xs text-stone-500 mt-1">
             Servicio de lavandería con recolección y entrega a domicilio
           </p>
+          <div className="mt-4 flex justify-center">
+            <FooterMapsRow />
+          </div>
         </div>
       </footer>
     </div>

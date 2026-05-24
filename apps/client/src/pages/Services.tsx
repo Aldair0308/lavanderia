@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useServices } from '../hooks/useServices';
+import { FooterMapsRow } from '../components/VisitMaps';
 
 function getGradient(name: string) {
   const n = name.toLowerCase();
@@ -220,6 +221,7 @@ export default function Services() {
                   <li>contacto@lavanderia.mx</li>
                   <li>+52 (55) 1234-5678</li>
                 </ul>
+                <FooterMapsRow />
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { VisitSection, FooterMapsRow } from '../components/VisitMaps';
 
 const services = [
   {
@@ -190,7 +191,7 @@ export default function Home() {
           <p className="text-stone-500 text-lg max-w-lg mb-14">Sin complicaciones. Sin esperas. Tú pides, nosotros entregamos.</p>
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0">
-            {/* Gradient connecting line */}
+            {/* Gradient connecting line — spans from center of first circle to center of third */}
             <div
               className="hidden md:block absolute top-6 h-0.5 bg-gradient-to-r from-teal-600 via-teal-500 to-amber-500 rounded-full"
               style={{ left: '24px', right: 'calc(33.333% - 24px)' }}
@@ -208,6 +209,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ─── Visítanos ─── */}
+      <VisitSection />
 
       {/* ─── CTA ─── */}
       <section className="py-20 md:py-28">
@@ -244,8 +248,11 @@ export default function Home() {
               <a href="#" className="hover:text-white transition-colors no-underline text-stone-500">Privacidad</a>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-stone-700 text-center text-xs text-stone-500">
-            © {new Date().getFullYear()} Lavandería OS. Todos los derechos reservados.
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t border-stone-700">
+            <div className="text-center text-xs text-stone-500">
+              © {new Date().getFullYear()} Lavandería OS. Todos los derechos reservados.
+            </div>
+            <FooterMapsRow />
           </div>
         </div>
       </footer>
