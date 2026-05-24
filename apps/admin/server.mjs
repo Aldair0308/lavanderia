@@ -7,6 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
 const port = parseInt(process.env.PORT || '3001', 10);
 
+console.log(`Starting admin server. __dirname=${__dirname}, distDir=${distDir}, port=${port}`);
+
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
