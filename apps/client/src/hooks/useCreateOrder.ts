@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '../lib/api';
 
 interface CreateOrderPayload {
   customer_name: string;
@@ -16,18 +17,11 @@ interface CreateOrderPayload {
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: CreateOrderPayload) => {
-      const res = await fetch('/api/orders', {
+    mutationFn: async (payload: CreateOrderPayload) =>
+      apiFetch('/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Error al crear pedido: ${res.status} ${errText}`);
-      }
-      return res.json();
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },

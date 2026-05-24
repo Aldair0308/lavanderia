@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiFetch } from '../lib/api';
 
 export const useSettings = () => {
-  const fetchSettings = async () => {
-    const res = await fetch('/api/settings');
-    if (!res.ok) throw new Error('Failed to fetch settings');
-    return res.json();
-  };
+  const fetchSettings = () => apiFetch('/settings');
   return useQuery({ queryKey: ['settings'], queryFn: fetchSettings });
 };
