@@ -1,5 +1,12 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from 'react-leaflet'
+import L from 'leaflet'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import {
   reverseGeocode,
@@ -10,7 +17,28 @@ import {
 } from '../lib/location'
 import 'leaflet/dist/leaflet.css'
 
-const DEFAULT_ZOOM = 15
+const DEFAULT_ZOOM = 16
+
+function pinIcon() {
+  return L.divIcon({
+    className: '',
+    iconSize: [36, 46],
+    iconAnchor: [18, 46],
+    html: `<svg width="36" height="46" viewBox="0 0 36 46" fill="none">
+      <defs>
+        <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#14B8A6"/>
+          <stop offset="100%" stop-color="#0D9488"/>
+        </linearGradient>
+        <filter id="ps">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".3"/>
+        </filter>
+      </defs>
+      <path d="M18 2C8.06 2 2 8.06 2 18c0 12 16 26 16 26s16-14 16-26C34 8.06 27.94 2 18 2z" fill="url(#pg)" filter="url(#ps)"/>
+      <circle cx="18" cy="18" r="6.5" fill="white"/>
+    </svg>`,
+  })
+}
 
 function SvgSearch() {
   return (
@@ -54,47 +82,61 @@ function SvgCrosshair() {
   )
 }
 
-function MapPinOverlay() {
-  return (
-    <div className="absolute inset-0 pointer-events-none z-[500] flex items-center justify-center">
-      <div className="relative" style={{ marginTop: '-28px' }}>
-        <svg width="36" height="46" viewBox="0 0 36 46" fill="none">
-          <defs>
-            <linearGradient id="pinG" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#14B8A6" />
-              <stop offset="100%" stopColor="#0D9488" />
-            </linearGradient>
-            <filter id="pinS">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.25" />
-            </filter>
-          </defs>
-          <path d="M18 2C8.06 2 2 8.06 2 18c0 12 16 26 16 26s16-14 16-26C34 8.06 27.94 2 18 2z" fill="url(#pinG)" filter="url(#pinS)" />
-          <circle cx="18" cy="18" r="6.5" fill="white" />
-        </svg>
-      </div>
-    </div>
-  )
-}
-
-function MapController({
-  onCenterChange,
-}: {
-  onCenterChange: (lat: number, lng: number) => void
-}) {
+function MapBoundsController() {
   const map = useMap()
-
   useEffect(() => {
     map.setMaxBounds(SAN_MATEO_BOUNDS)
   }, [map])
+  return null
+}
 
+function MapDragListener({
+  onMapDrag,
+}: {
+  onMapDrag: (lat: number, lng: number) => void
+}) {
+  const map = useMap()
   useMapEvents({
     dragend() {
       const c = map.getCenter()
-      onCenterChange(c.lat, c.lng)
+      onMapDrag(c.lat, c.lng)
     },
   })
-
   return null
+}
+
+function DraggableMarker({
+  position,
+  onMove,
+}: {
+  position: [number, number]
+  onMove: (lat: number, lng: number) => void
+}) {
+  const markerRef = useRef<L.Marker>(null)
+  const icon = useMemo(() => pinIcon(), [])
+
+  const eventHandlers = useMemo(
+    () => ({
+      dragend() {
+        const m = markerRef.current
+        if (m) {
+          const p = m.getLatLng()
+          onMove(p.lat, p.lng)
+        }
+      },
+    }),
+    [onMove],
+  )
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={position}
+      draggable={true}
+      icon={icon}
+      eventHandlers={eventHandlers}
+    />
+  )
 }
 
 interface LocationPickerProps {
@@ -122,12 +164,10 @@ export default function LocationPicker({
   const [address, setAddress] = useState(initialAddress ?? '')
   const [resolving, setResolving] = useState(false)
   const [locating, setLocating] = useState(false)
-  const [pickedFromSearch, setPickedFromSearch] = useState(false)
   const [geoError, setGeoError] = useState('')
   const { suggestions, loading } = useLocationSearch(query)
   const suggestionsRef = useRef<HTMLUListElement>(null)
   const [focusedIdx, setFocusedIdx] = useState(-1)
-  const mapRef = useRef<L.Map | null>(null)
 
   const reverseResolve = useCallback(async (lat: number, lng: number) => {
     setResolving(true)
@@ -142,10 +182,12 @@ export default function LocationPicker({
   }, [])
 
   useEffect(() => {
-    if (!pickedFromSearch && open) {
-      reverseResolve(selectedPos[0], selectedPos[1])
+    if (open) {
+      const lat = initialLat ?? SAN_MATEO_CENTER[0]
+      const lng = initialLng ?? SAN_MATEO_CENTER[1]
+      setSelectedPos([lat, lng])
+      if (!initialAddress) reverseResolve(lat, lng)
     }
-    setPickedFromSearch(false)
   }, [open])
 
   const flyTo = useCallback((lat: number, lng: number) => {
@@ -156,17 +198,24 @@ export default function LocationPicker({
     const lat = parseFloat(s.lat)
     const lng = parseFloat(s.lon)
     flyTo(lat, lng)
-    setQuery('')
     setAddress(s.display_name || s.short_name)
     reverseResolve(lat, lng)
-    setPickedFromSearch(true)
-    setFocusedIdx(-1)
     setGeoError('')
   }
 
-  const handleCenterChange = useCallback(
+  const handleMarkerMove = useCallback(
     (lat: number, lng: number) => {
       setSelectedPos([lat, lng])
+      setAddress('')
+      reverseResolve(lat, lng)
+    },
+    [reverseResolve],
+  )
+
+  const handleMapDrag = useCallback(
+    (lat: number, lng: number) => {
+      setSelectedPos([lat, lng])
+      setAddress('')
       reverseResolve(lat, lng)
     },
     [reverseResolve],
@@ -184,17 +233,17 @@ export default function LocationPicker({
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
         flyTo(lat, lng)
-        setPickedFromSearch(true)
+        setAddress('')
         reverseResolve(lat, lng)
         setLocating(false)
       },
       (err) => {
         setLocating(false)
-        if (err.code === err.PERMISSION_DENIED) {
-          setGeoError('Permiso denegado. Actívalo desde la configuración de tu navegador.')
-        } else {
-          setGeoError('No se pudo obtener tu ubicación. Intenta de nuevo.')
-        }
+        setGeoError(
+          err.code === err.PERMISSION_DENIED
+            ? 'Permiso denegado. Actívalo desde la configuración de tu navegador.'
+            : 'No se pudo obtener tu ubicación. Intenta de nuevo.',
+        )
       },
       { enableHighAccuracy: true, timeout: 10000 },
     )
@@ -208,9 +257,7 @@ export default function LocationPicker({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!suggestions.length) {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-      }
+      if (e.key === 'Enter') e.preventDefault()
       return
     }
     if (e.key === 'ArrowDown') {
@@ -233,9 +280,7 @@ export default function LocationPicker({
   }, [focusedIdx])
 
   useEffect(() => {
-    if (!query.trim()) {
-      setFocusedIdx(-1)
-    }
+    if (!query.trim()) setFocusedIdx(-1)
   }, [query])
 
   if (!open) return null
@@ -243,7 +288,7 @@ export default function LocationPicker({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
       {/* ── Header / Search ── */}
-      <div className="relative z-20 flex items-center gap-3 px-4 pt-12 pb-2 bg-white border-b border-border shrink-0 shadow-sm">
+      <div className="relative z-30 flex items-center gap-3 px-4 pt-12 pb-2 bg-white border-b border-border shrink-0 shadow-sm">
         <button
           type="button"
           onClick={onClose}
@@ -267,7 +312,43 @@ export default function LocationPicker({
         </div>
       </div>
 
-      {/* ── Map (full remaining height, suggestions float on top) ── */}
+      {/* ── Suggestions overlay ── */}
+      {query.trim() && (
+        <div className="relative z-30">
+          <ul
+            ref={suggestionsRef}
+            className="bg-white shadow-lg border-b border-border overflow-y-auto max-h-56"
+          >
+            {loading && (
+              <li className="px-4 py-4 text-sm text-stone-500 text-center">Buscando…</li>
+            )}
+            {!loading && suggestions.length === 0 && (
+              <li className="px-4 py-4 text-sm text-stone-500 text-center">Sin resultados en San Mateo Atenco</li>
+            )}
+            {suggestions.map((s, i) => (
+              <li
+                key={i}
+                onClick={() => handleSearchPick(s)}
+                className={`flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors border-b border-border/40 last:border-b-0 ${
+                  i === focusedIdx ? 'bg-teal-50' : 'hover:bg-cream'
+                }`}
+              >
+                <span className="w-8 h-8 rounded-md bg-warm-gray flex items-center justify-center shrink-0 text-stone-400 mt-0.5">
+                  <SvgPin />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-stone-900 truncate">{s.short_name}</p>
+                  {s.subtitle && (
+                    <p className="text-xs text-stone-500 truncate mt-0.5">{s.subtitle}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ── Map ── */}
       <div className="flex-1 relative">
         <MapContainer
           center={selectedPos}
@@ -277,17 +358,17 @@ export default function LocationPicker({
           attributionControl={false}
           maxBounds={SAN_MATEO_BOUNDS}
           maxBoundsViscosity={1}
-          ref={mapRef as any}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             maxZoom={19}
           />
-          <MapController onCenterChange={handleCenterChange} />
+          <MapBoundsController />
+          <MapDragListener onMapDrag={handleMapDrag} />
+          <FlyToController position={selectedPos} />
+          <DraggableMarker position={selectedPos} onMove={handleMarkerMove} />
         </MapContainer>
-        <MapPinOverlay />
 
-        {/* Locate button */}
         <button
           type="button"
           onClick={handleLocate}
@@ -304,63 +385,12 @@ export default function LocationPicker({
             <SvgCrosshair />
           )}
         </button>
-
-        {/* ── Suggestions dropdown (overlaid on map) ── */}
-        {query.trim() && (
-          <div className="absolute top-0 left-0 right-0 z-[1000] mx-4 mt-2">
-            <ul
-              ref={suggestionsRef}
-              className="bg-white rounded-xl shadow-lg border border-border overflow-y-auto max-h-64"
-            >
-              {loading && (
-                <li className="px-4 py-4 text-sm text-stone-500 text-center">
-                  Buscando…
-                </li>
-              )}
-              {!loading && suggestions.length === 0 && (
-                <li className="px-4 py-4 text-sm text-stone-500 text-center">
-                  Sin resultados en San Mateo Atenco
-                </li>
-              )}
-              {suggestions.map((s, i) => (
-                <li
-                  key={i}
-                  onClick={() => handleSearchPick(s)}
-                  className={`flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors border-b border-border/40 last:border-b-0 ${
-                    i === focusedIdx ? 'bg-teal-50' : 'hover:bg-cream'
-                  }`}
-                >
-                  <span className="w-8 h-8 rounded-md bg-warm-gray flex items-center justify-center shrink-0 text-stone-400 mt-0.5">
-                    <SvgPin />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-stone-900 truncate">
-                      {s.short_name}
-                    </p>
-                    {s.subtitle && (
-                      <p className="text-xs text-stone-500 truncate mt-0.5">
-                        {s.subtitle}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Bottom hint */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[500] text-[10px] text-stone-400 bg-white/80 px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
-          Arrastra el mapa para mover el marcador
-        </div>
       </div>
 
       {/* ── Geo error ── */}
       {geoError && (
         <div className="shrink-0 px-4 pt-2">
-          <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-200">
-            {geoError}
-          </p>
+          <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-200">{geoError}</p>
         </div>
       )}
 
@@ -398,4 +428,21 @@ export default function LocationPicker({
       </div>
     </div>
   )
+}
+
+function FlyToController({ position }: { position: [number, number] }) {
+  const map = useMap()
+  const prev = useRef(position)
+
+  useEffect(() => {
+    const [lat, lng] = position
+    const [plat, plng] = prev.current
+    const moved = Math.abs(lat - plat) > 0.0001 || Math.abs(lng - plng) > 0.0001
+    if (moved) {
+      map.flyTo(position, map.getZoom(), { animate: true, duration: 0.4 })
+    }
+    prev.current = position
+  }, [map, position])
+
+  return null
 }
