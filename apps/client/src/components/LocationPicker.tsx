@@ -78,24 +78,14 @@ function MapPinOverlay() {
 
 function MapController({
   onCenterChange,
-  center,
 }: {
   onCenterChange: (lat: number, lng: number) => void
-  center: [number, number]
 }) {
   const map = useMap()
-  const ready = useRef(false)
 
   useEffect(() => {
     map.setMaxBounds(SAN_MATEO_BOUNDS)
   }, [map])
-
-  useEffect(() => {
-    if (!ready.current) {
-      map.setView(center, map.getZoom())
-      ready.current = true
-    }
-  }, [map, center])
 
   useMapEvents({
     dragend() {
@@ -137,6 +127,7 @@ export default function LocationPicker({
   const { suggestions, loading } = useLocationSearch(query)
   const suggestionsRef = useRef<HTMLUListElement>(null)
   const [focusedIdx, setFocusedIdx] = useState(-1)
+  const mapRef = useRef<L.Map | null>(null)
 
   const reverseResolve = useCallback(async (lat: number, lng: number) => {
     setResolving(true)
@@ -157,12 +148,17 @@ export default function LocationPicker({
     setPickedFromSearch(false)
   }, [open])
 
+  const flyTo = useCallback((lat: number, lng: number) => {
+    setSelectedPos([lat, lng])
+  }, [])
+
   const handleSearchPick = (s: Suggestion) => {
     const lat = parseFloat(s.lat)
     const lng = parseFloat(s.lon)
-    setSelectedPos([lat, lng])
+    flyTo(lat, lng)
     setQuery('')
-    setAddress(formatAddress(s))
+    setAddress(s.display_name || s.short_name)
+    reverseResolve(lat, lng)
     setPickedFromSearch(true)
     setFocusedIdx(-1)
     setGeoError('')
@@ -187,7 +183,7 @@ export default function LocationPicker({
       (pos) => {
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
-        setSelectedPos([lat, lng])
+        flyTo(lat, lng)
         setPickedFromSearch(true)
         reverseResolve(lat, lng)
         setLocating(false)
@@ -211,7 +207,12 @@ export default function LocationPicker({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!suggestions.length) return
+    if (!suggestions.length) {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+      }
+      return
+    }
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setFocusedIdx((prev) => Math.min(prev + 1, suggestions.length - 1))
@@ -231,12 +232,18 @@ export default function LocationPicker({
     }
   }, [focusedIdx])
 
+  useEffect(() => {
+    if (!query.trim()) {
+      setFocusedIdx(-1)
+    }
+  }, [query])
+
   if (!open) return null
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
       {/* ── Header / Search ── */}
-      <div className="flex items-center gap-3 px-4 pt-12 pb-2 bg-white border-b border-border shrink-0">
+      <div className="relative z-20 flex items-center gap-3 px-4 pt-12 pb-2 bg-white border-b border-border shrink-0 shadow-sm">
         <button
           type="button"
           onClick={onClose}
@@ -260,46 +267,7 @@ export default function LocationPicker({
         </div>
       </div>
 
-      {/* ── Suggestions ── */}
-      {query.trim() && (
-        <div className="relative shrink-0">
-          <ul
-            ref={suggestionsRef}
-            className="absolute top-0 left-0 right-0 z-40 bg-white border-b border-border shadow-md max-h-56 overflow-y-auto"
-          >
-            {loading && (
-              <li className="px-4 py-3 text-sm text-stone-500 text-center">
-                Buscando…
-              </li>
-            )}
-            {!loading && suggestions.length === 0 && (
-              <li className="px-4 py-3 text-sm text-stone-500 text-center">
-                Sin resultados en San Mateo Atenco
-              </li>
-            )}
-            {suggestions.map((s, i) => (
-              <li
-                key={i}
-                onClick={() => handleSearchPick(s)}
-                className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors ${
-                  i === focusedIdx ? 'bg-cream' : 'hover:bg-cream'
-                }`}
-              >
-                <span className="w-8 h-8 rounded-md bg-warm-gray flex items-center justify-center shrink-0 text-stone-400 mt-0.5">
-                  <SvgPin />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-stone-900 truncate">
-                    {s.display_name}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* ── Map ── */}
+      {/* ── Map (full remaining height, suggestions float on top) ── */}
       <div className="flex-1 relative">
         <MapContainer
           center={selectedPos}
@@ -309,12 +277,13 @@ export default function LocationPicker({
           attributionControl={false}
           maxBounds={SAN_MATEO_BOUNDS}
           maxBoundsViscosity={1}
+          ref={mapRef as any}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             maxZoom={19}
           />
-          <MapController center={selectedPos} onCenterChange={handleCenterChange} />
+          <MapController onCenterChange={handleCenterChange} />
         </MapContainer>
         <MapPinOverlay />
 
@@ -335,6 +304,50 @@ export default function LocationPicker({
             <SvgCrosshair />
           )}
         </button>
+
+        {/* ── Suggestions dropdown (overlaid on map) ── */}
+        {query.trim() && (
+          <div className="absolute top-0 left-0 right-0 z-[1000] mx-4 mt-2">
+            <ul
+              ref={suggestionsRef}
+              className="bg-white rounded-xl shadow-lg border border-border overflow-y-auto max-h-64"
+            >
+              {loading && (
+                <li className="px-4 py-4 text-sm text-stone-500 text-center">
+                  Buscando…
+                </li>
+              )}
+              {!loading && suggestions.length === 0 && (
+                <li className="px-4 py-4 text-sm text-stone-500 text-center">
+                  Sin resultados en San Mateo Atenco
+                </li>
+              )}
+              {suggestions.map((s, i) => (
+                <li
+                  key={i}
+                  onClick={() => handleSearchPick(s)}
+                  className={`flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors border-b border-border/40 last:border-b-0 ${
+                    i === focusedIdx ? 'bg-teal-50' : 'hover:bg-cream'
+                  }`}
+                >
+                  <span className="w-8 h-8 rounded-md bg-warm-gray flex items-center justify-center shrink-0 text-stone-400 mt-0.5">
+                    <SvgPin />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-stone-900 truncate">
+                      {s.short_name}
+                    </p>
+                    {s.subtitle && (
+                      <p className="text-xs text-stone-500 truncate mt-0.5">
+                        {s.subtitle}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Bottom hint */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[500] text-[10px] text-stone-400 bg-white/80 px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
