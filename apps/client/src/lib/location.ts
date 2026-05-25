@@ -4,6 +4,15 @@ export interface Suggestion {
   lon: string
   type: string
   importance: number
+  properties?: {
+    osm_type?: string
+    osm_id?: number
+    extent?: [number, number, number, number]
+    street?: string
+    city?: string
+    state?: string
+    country?: string
+  }
 }
 
 export interface ReverseResult {
@@ -12,22 +21,32 @@ export interface ReverseResult {
   lon: string
 }
 
-const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org'
+const PHOTON_BASE = 'https://photon.komoot.io'
 
 export async function searchLocation(query: string): Promise<Suggestion[]> {
   if (!query.trim()) return []
   const params = new URLSearchParams({
     q: query,
-    format: 'json',
     limit: '5',
-    countrycodes: 'mx',
-    addressdetails: '1',
+    lang: 'es',
   })
-  const res = await fetch(`${NOMINATIM_BASE}/search?${params}`, {
-    headers: { 'Accept-Language': 'es' },
-  })
+  const res = await fetch(`${PHOTON_BASE}/api?${params}`)
   if (!res.ok) throw new Error('Error al buscar dirección')
-  return res.json()
+  const data = await res.json()
+  return (data.features ?? []).map((f: any) => ({
+    display_name: f.properties?.name
+      ? [f.properties.name, f.properties?.street, f.properties?.city, f.properties?.state]
+          .filter(Boolean)
+          .join(', ')
+      : [f.properties?.street, f.properties?.city, f.properties?.state]
+          .filter(Boolean)
+          .join(', ') || f.properties?.osm_value || '',
+    lat: String(f.geometry?.coordinates?.[1] ?? ''),
+    lon: String(f.geometry?.coordinates?.[0] ?? ''),
+    type: f.properties?.osm_value ?? 'unknown',
+    importance: 0,
+    properties: f.properties,
+  }))
 }
 
 export async function reverseGeocode(
@@ -37,16 +56,22 @@ export async function reverseGeocode(
   const params = new URLSearchParams({
     lat: String(lat),
     lon: String(lng),
-    format: 'json',
-    addressdetails: '1',
+    lang: 'es',
   })
-  const res = await fetch(`${NOMINATIM_BASE}/reverse?${params}`, {
-    headers: { 'Accept-Language': 'es' },
-  })
+  const res = await fetch(`${PHOTON_BASE}/reverse?${params}`)
   if (!res.ok) throw new Error('Error al obtener dirección')
-  return res.json()
+  const data = await res.json()
+  const feature = data.features?.[0]
+  const props = feature?.properties ?? {}
+  const coords = feature?.geometry?.coordinates ?? []
+  const parts = [props.name, props.street, props.city, props.state, props.country].filter(Boolean)
+  return {
+    display_name: parts.join(', ') || 'Ubicación seleccionada',
+    lat: String(coords[1] ?? lat),
+    lon: String(coords[0] ?? lng),
+  }
 }
 
 export function formatAddress(s: Suggestion | ReverseResult): string {
-  return s.display_name?.split(',')?.slice(0, 3)?.join(',') ?? s.display_name
+  return s.display_name
 }
