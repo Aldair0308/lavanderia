@@ -36,6 +36,12 @@ export class Order {
   @Column({ type: 'decimal', nullable: true })
   total_price?: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  pickup_lat?: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  pickup_lng?: number;
+
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date;
 

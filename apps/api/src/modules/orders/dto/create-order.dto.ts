@@ -35,4 +35,12 @@ export class CreateOrderDto {
   @IsOptional()
   @IsNumber()
   total_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  pickup_lat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  pickup_lng?: number;
 }
