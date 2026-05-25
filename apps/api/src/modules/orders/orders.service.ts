@@ -48,6 +48,8 @@ export class OrdersService {
       notes: data.notes,
       pickup_address: data.pickup_address,
       pickup_scheduled_at: pickupScheduled,
+      pickup_lat: data.pickup_lat,
+      pickup_lng: data.pickup_lng,
       total_price: data.total_price,
       status: OrderStatus.PENDIENTE,
     });
