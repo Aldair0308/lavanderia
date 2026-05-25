@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,6 +54,11 @@ export default function CreateOrder() {
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
 
+  const section1Ref = useRef<HTMLElement>(null);
+  const section2Ref = useRef<HTMLElement>(null);
+  const section3Ref = useRef<HTMLElement>(null);
+  const section4Ref = useRef<HTMLElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -64,6 +69,28 @@ export default function CreateOrder() {
     resolver: zodResolver(orderSchema),
     defaultValues: { quantity_kg: 1 },
   });
+
+  const formValues = watch();
+
+  useEffect(() => {
+    const hasContact = formValues.customer_name || formValues.customer_phone;
+    const hasService = formValues.service_type;
+    const hasDetails = formValues.pickup_address || formValues.quantity_kg || formValues.pickup_date || formValues.pickup_time;
+
+    if (!hasContact && !hasService && !hasDetails) {
+      section1Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (hasContact && !hasService && !hasDetails) {
+      section2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (hasContact && hasService && !hasDetails) {
+      section3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (hasContact && hasService && hasDetails) {
+      section4Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (hasContact) {
+      section2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      section1Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
 
   const quantityKg = watch('quantity_kg') ?? 1;
   const watchedService = watch('service_type');
@@ -149,7 +176,7 @@ export default function CreateOrder() {
       <main className="max-w-2xl mx-auto px-4 pb-24">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
           {/* ── Section 1: Contact ── */}
-          <section className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
+          <section ref={section1Ref} className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
             <SectionHeader number={1} title="Datos de contacto" />
 
             <div className="space-y-5">
@@ -188,7 +215,7 @@ export default function CreateOrder() {
           </section>
 
           {/* ── Section 2: Service type ── */}
-          <section className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
+          <section ref={section2Ref} className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
             <SectionHeader number={2} title="Tipo de servicio" />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -233,7 +260,7 @@ export default function CreateOrder() {
           </section>
 
           {/* ── Section 3: Order details ── */}
-          <section className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
+          <section ref={section3Ref} className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
             <SectionHeader number={3} title="Detalles del pedido" />
 
             <div className="space-y-5">
@@ -368,7 +395,7 @@ export default function CreateOrder() {
           </section>
 
           {/* ── Section 4: Summary ── */}
-          <section className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
+          <section ref={section4Ref} className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
             <SectionHeader number={4} title="Resumen del pedido" />
 
             <div className="rounded-xl bg-cream border border-border divide-y divide-border">
