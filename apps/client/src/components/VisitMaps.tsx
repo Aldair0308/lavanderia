@@ -20,6 +20,7 @@ const PROVIDER_META = {
 interface MapLinkProps {
   provider: keyof typeof PROVIDER_META;
   size?: 'md' | 'sm';
+  variant?: 'light' | 'dark';
   className?: string;
 }
 
@@ -33,21 +34,26 @@ const LOGO_SIZE = {
   sm: 22,
 } as const;
 
-export function MapLink({ provider, size = 'md', className = '' }: MapLinkProps) {
+export function MapLink({ provider, size = 'md', variant = 'light', className = '' }: MapLinkProps) {
   const m = PROVIDER_META[provider];
   const logoPx = LOGO_SIZE[size];
+
+  const surface = variant === 'dark'
+    ? 'bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10'
+    : `bg-white border-border shadow-sm ${m.bgHover}`;
 
   return (
     <a
       href={m.href()}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${SIZE[size]} ${m.bgHover}
+      className={`${SIZE[size]}
         inline-flex items-center font-semibold no-underline
-        bg-white border border-border shadow-sm
-        transition-all hover:-translate-y-0.5 hover:shadow-md
+        border transition-all
+        hover:-translate-y-0.5 hover:shadow-md
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
         focus-visible:ring-offset-white focus-visible:ring-teal-500
+        ${surface}
         ${className}`}
       aria-label={m.label}
     >
@@ -60,7 +66,7 @@ export function MapLink({ provider, size = 'md', className = '' }: MapLinkProps)
         style={{ width: logoPx, height: logoPx }}
         loading="lazy"
       />
-      <span style={{ color: m.brand }}>{m.label}</span>
+      <span style={{ color: variant === 'dark' ? 'white' : m.brand }}>{m.label}</span>
     </a>
   );
 }
@@ -114,8 +120,8 @@ export function VisitSection() {
 export function FooterMapsRow() {
   return (
     <div className="flex gap-2" role="group" aria-label="Cómo llegar">
-      <MapLink provider="maps" size="sm" />
-      <MapLink provider="waze" size="sm" />
+      <MapLink provider="maps" size="sm" variant="dark" />
+      <MapLink provider="waze" size="sm" variant="dark" />
     </div>
   );
 }
