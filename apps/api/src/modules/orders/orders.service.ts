@@ -33,7 +33,6 @@ export class OrdersService {
       customer = await this.customersService.create({
         name: data.customer_name,
         phone_whatsapp: data.customer_phone,
-        email: data.customer_email,
         address: data.pickup_address,
       });
     }

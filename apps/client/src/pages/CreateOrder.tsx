@@ -10,7 +10,6 @@ import LocationPicker from '../components/LocationPicker';
 const orderSchema = z.object({
   customer_name: z.string().min(1, 'Ingresa tu nombre'),
   customer_phone: z.string().min(1, 'Ingresa tu teléfono'),
-  customer_email: z.string().email('Correo electrónico inválido'),
   pickup_address: z.string().min(1, 'Selecciona tu ubicación'),
   pickup_lat: z.number().optional(),
   pickup_lng: z.number().optional(),
@@ -183,22 +182,6 @@ export default function CreateOrder() {
                 />
                 {errors.customer_phone && (
                   <p className="mt-1 text-sm text-red-600">{errors.customer_phone.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="customer_email">
-                  Correo electrónico
-                </label>
-                <input
-                  id="customer_email"
-                  type="email"
-                  placeholder="Ej. maria@ejemplo.com"
-                  {...register('customer_email')}
-                  className="w-full rounded-lg border-border px-4 py-3 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
-                />
-                {errors.customer_email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.customer_email.message}</p>
                 )}
               </div>
             </div>

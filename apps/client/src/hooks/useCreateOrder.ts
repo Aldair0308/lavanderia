@@ -4,7 +4,6 @@ import { apiFetch } from '../lib/api';
 interface CreateOrderPayload {
   customer_name: string;
   customer_phone: string;
-  customer_email?: string;
   service_type: string;
   quantity_kg: number;
   pickup_address: string;

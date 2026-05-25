@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsDateString, IsEmail } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateOrderDto {
   @IsString()
@@ -6,10 +6,6 @@ export class CreateOrderDto {
 
   @IsString()
   customer_phone!: string;
-
-  @IsOptional()
-  @IsEmail()
-  customer_email?: string;
 
   @IsString()
   service_type!: string;
