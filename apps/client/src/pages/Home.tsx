@@ -191,14 +191,11 @@ export default function Home() {
           <p className="text-stone-500 text-lg max-w-lg mb-14">Sin complicaciones. Sin esperas. Tú pides, nosotros entregamos.</p>
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0">
-            {/* Gradient connecting line — spans from center of first circle to center of third */}
-            <div
-              className="hidden md:block absolute top-6 h-0.5 bg-gradient-to-r from-teal-600 via-teal-500 to-amber-500 rounded-full"
-              style={{ left: '24px', right: 'calc(33.333% - 24px)' }}
-            />
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-6 left-[16.666%] right-[16.666%] h-0.5 bg-gradient-to-r from-teal-600 via-teal-500 to-amber-500 rounded-full" />
 
             {steps.map((step) => (
-              <div key={step.number} className="relative text-center md:text-left flex flex-col items-center md:items-start">
+              <div key={step.number} className="relative flex flex-col items-center text-center">
                 <div className="w-12 h-12 rounded-full bg-teal-600 text-white font-display text-xl flex items-center justify-center mb-4 relative z-10 ring-4 ring-cream">
                   {step.number}
                 </div>
