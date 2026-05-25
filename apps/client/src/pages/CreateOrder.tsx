@@ -5,12 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCreateOrder } from '../hooks/useCreateOrder';
 import { useServices } from '../hooks/useServices';
+import LocationPicker from '../components/LocationPicker';
 
 const orderSchema = z.object({
   customer_name: z.string().min(1, 'Ingresa tu nombre'),
   customer_phone: z.string().min(1, 'Ingresa tu teléfono'),
   customer_email: z.string().email('Correo electrónico inválido'),
-  pickup_address: z.string().min(1, 'Ingresa la dirección de recolección'),
+  pickup_address: z.string().min(1, 'Selecciona tu ubicación'),
+  pickup_lat: z.number().optional(),
+  pickup_lng: z.number().optional(),
   quantity_kg: z.number({ required_error: 'Ingresa la cantidad' }).min(1, 'Mínimo 1 kg'),
   pickup_date: z.string().min(1, 'Selecciona la fecha de recolección'),
   pickup_time: z.string().min(1, 'Selecciona el horario de recolección'),
@@ -49,6 +52,8 @@ export default function CreateOrder() {
   const { services, isLoading: servicesLoading, error: servicesError } = useServices();
   const { mutateAsync, isPending: submitting, error: submitError } = useCreateOrder();
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const {
     register,
@@ -84,9 +89,19 @@ export default function CreateOrder() {
     setValue('quantity_kg', next, { shouldValidate: true });
   };
 
+  const handleLocationConfirm = (address: string, lat: number, lng: number) => {
+    setValue('pickup_address', address, { shouldValidate: true });
+    setPickupCoords({ lat, lng });
+  };
+
   const onSubmit = async (data: OrderFormValues) => {
     try {
-      const payload = { ...data, total_price: pricePerKg * data.quantity_kg };
+      const payload = {
+        ...data,
+        pickup_lat: pickupCoords?.lat,
+        pickup_lng: pickupCoords?.lng,
+        total_price: pricePerKg * data.quantity_kg,
+      };
       const created = await mutateAsync(payload);
       navigate(`/pedido/${created.id}`);
     } catch {}
@@ -273,16 +288,43 @@ export default function CreateOrder() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="pickup_address">
+                <label className="block text-sm font-medium text-stone-700 mb-1">
                   Dirección de recolección
                 </label>
-                <textarea
-                  id="pickup_address"
-                  rows={3}
-                  placeholder="Calle, número, colonia, C.P.…"
-                  {...register('pickup_address')}
-                  className="w-full rounded-lg border-border px-4 py-3 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition resize-none"
-                />
+                <button
+                  type="button"
+                  onClick={() => setLocationPickerOpen(true)}
+                  className="w-full text-left rounded-lg border border-border px-4 py-3 text-stone-900 bg-white hover:bg-cream focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition min-h-[3rem]"
+                >
+                  {pickupCoords ? (
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-stone-900 truncate">
+                          {watch('pickup_address')}
+                        </p>
+                        <p className="text-xs text-stone-500">
+                          {pickupCoords.lat.toFixed(5)}, {pickupCoords.lng.toFixed(5)}
+                        </p>
+                      </div>
+                      <svg className="w-4 h-4 shrink-0 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <span className="text-stone-400 flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                      </svg>
+                      Seleccionar ubicación en el mapa
+                    </span>
+                  )}
+                </button>
+                <input type="hidden" {...register('pickup_address')} />
                 {errors.pickup_address && (
                   <p className="mt-1 text-sm text-red-600">{errors.pickup_address.message}</p>
                 )}
@@ -397,6 +439,15 @@ export default function CreateOrder() {
           </section>
         </form>
       </main>
+
+      <LocationPicker
+        open={locationPickerOpen}
+        onClose={() => setLocationPickerOpen(false)}
+        onConfirm={handleLocationConfirm}
+        initialAddress={watch('pickup_address')}
+        initialLat={pickupCoords?.lat}
+        initialLng={pickupCoords?.lng}
+      />
     </div>
   );
 }

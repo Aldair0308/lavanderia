@@ -11,7 +11,8 @@
             { "label": "home.html", "path": "opendesign/mockups/lavanderia-frontend/home.html" },
             { "label": "services.html", "path": "opendesign/mockups/lavanderia-frontend/services.html" },
             { "label": "create-order.html", "path": "opendesign/mockups/lavanderia-frontend/create-order.html" },
-            { "label": "order-status.html", "path": "opendesign/mockups/lavanderia-frontend/order-status.html" }
+            { "label": "order-status.html", "path": "opendesign/mockups/lavanderia-frontend/order-status.html" },
+            { "label": "location-picker.html", "path": "opendesign/mockups/lavanderia-frontend/location-picker.html" }
           ]
         },
         {

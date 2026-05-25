@@ -8,6 +8,8 @@ interface CreateOrderPayload {
   service_type: string;
   quantity_kg: number;
   pickup_address: string;
+  pickup_lat?: number;
+  pickup_lng?: number;
   pickup_date?: string;
   pickup_time?: string;
   notes?: string;
