@@ -1,28 +1,67 @@
 import { STORE, googleMapsUrl, wazeUrl } from '../lib/store-location';
 
-function LogoMaps({ size = 20 }: { size?: number }) {
-  return (
-    <img
-      src="/logos/Maps.jpg"
-      alt="Google Maps"
-      width={size}
-      height={size}
-      className="rounded-sm object-contain"
-      style={{ width: size, height: size }}
-    />
-  );
+const PROVIDER_META = {
+  maps: {
+    label: 'Abrir en Google Maps',
+    href: googleMapsUrl,
+    logo: '/logos/Maps.jpg',
+    brand: '#4285F4',
+    bgHover: 'hover:bg-blue-50',
+  },
+  waze: {
+    label: 'Abrir en Waze',
+    href: wazeUrl,
+    logo: '/logos/Waze.png',
+    brand: '#33CCFF',
+    bgHover: 'hover:bg-sky-50',
+  },
+} as const;
+
+interface MapLinkProps {
+  provider: keyof typeof PROVIDER_META;
+  size?: 'md' | 'sm';
+  className?: string;
 }
 
-function LogoWaze({ size = 20 }: { size?: number }) {
+const SIZE = {
+  md: 'px-5 py-3 rounded-xl text-sm gap-3',
+  sm: 'px-3 py-2 rounded-lg text-xs gap-2',
+} as const;
+
+const LOGO_SIZE = {
+  md: 28,
+  sm: 22,
+} as const;
+
+export function MapLink({ provider, size = 'md', className = '' }: MapLinkProps) {
+  const m = PROVIDER_META[provider];
+  const logoPx = LOGO_SIZE[size];
+
   return (
-    <img
-      src="/logos/Waze.png"
-      alt="Waze"
-      width={size}
-      height={size}
-      className="rounded-sm object-contain"
-      style={{ width: size, height: size }}
-    />
+    <a
+      href={m.href()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${SIZE[size]} ${m.bgHover}
+        inline-flex items-center font-semibold no-underline
+        bg-white border border-border shadow-sm
+        transition-all hover:-translate-y-0.5 hover:shadow-md
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+        focus-visible:ring-offset-white focus-visible:ring-teal-500
+        ${className}`}
+      aria-label={m.label}
+    >
+      <img
+        src={m.logo}
+        alt=""
+        width={logoPx}
+        height={logoPx}
+        className="rounded-sm object-contain flex-shrink-0"
+        style={{ width: logoPx, height: logoPx }}
+        loading="lazy"
+      />
+      <span style={{ color: m.brand }}>{m.label}</span>
+    </a>
   );
 }
 
@@ -34,68 +73,6 @@ function SvgPin({ size = 22 }: { size?: number }) {
     </svg>
   );
 }
-
-// ──────────── MapLink — polymorphic external link ────────────
-
-type Provider = 'maps' | 'waze';
-
-interface MapLinkProps {
-  provider: Provider;
-  variant?: 'primary' | 'compact' | 'inline';
-  className?: string;
-}
-
-const PROVIDER_META = {
-  maps: {
-    label: 'Abrir en Google Maps',
-    short: 'Google Maps',
-    href: googleMapsUrl,
-    icon: LogoMaps,
-    bg: 'bg-[#4285F4]',
-    hover: 'hover:bg-[#3367D6]',
-    text: 'text-white',
-  },
-  waze: {
-    label: 'Abrir en Waze',
-    short: 'Waze',
-    href: wazeUrl,
-    icon: LogoWaze,
-    bg: 'bg-[#33CCFF]',
-    hover: 'hover:bg-[#29B8E6]',
-    text: 'text-[#0B0B0B]',
-  },
-} as const;
-
-const VARIANT = {
-  primary: 'px-5 py-3 rounded-lg text-sm gap-2',
-  compact: 'px-3.5 py-2 rounded-lg text-xs gap-1.5',
-  inline: 'px-3 py-1.5 rounded-lg text-xs gap-1.5',
-} as const;
-
-export function MapLink({ provider, variant = 'primary', className = '' }: MapLinkProps) {
-  const m = PROVIDER_META[provider];
-  const Icon = m.icon;
-
-  return (
-    <a
-      href={m.href()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`${m.bg} ${m.text} ${m.hover} ${VARIANT[variant]}
-        inline-flex items-center justify-center font-semibold no-underline
-        transition-all hover:-translate-y-0.5 hover:shadow-md
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-        focus-visible:ring-offset-white focus-visible:ring-teal-500
-        ${className}`}
-      aria-label={`Abrir ${m.label} con la dirección de la sucursal`}
-    >
-      <Icon size={variant === 'inline' ? 16 : variant === 'compact' ? 18 : 20} />
-      {variant === 'primary' ? m.label : m.short}
-    </a>
-  );
-}
-
-// ──────────── A) VisitSection — Home page hero ────────────
 
 export function VisitSection() {
   return (
@@ -125,8 +102,8 @@ export function VisitSection() {
           </div>
 
           <div className="flex gap-3 w-full md:w-auto" role="group" aria-label="Abrir en aplicación de mapas">
-            <MapLink provider="maps" variant="primary" className="flex-1 md:flex-none" />
-            <MapLink provider="waze" variant="primary" className="flex-1 md:flex-none" />
+            <MapLink provider="maps" className="flex-1 md:flex-none" />
+            <MapLink provider="waze" className="flex-1 md:flex-none" />
           </div>
         </div>
       </div>
@@ -134,18 +111,14 @@ export function VisitSection() {
   );
 }
 
-// ──────────── B) FooterMapsRow — compact footer row ────────────
-
 export function FooterMapsRow() {
   return (
-    <div className="flex gap-2 mt-3" role="group" aria-label="Cómo llegar">
-      <MapLink provider="maps" variant="inline" />
-      <MapLink provider="waze" variant="inline" />
+    <div className="flex gap-2" role="group" aria-label="Cómo llegar">
+      <MapLink provider="maps" size="sm" />
+      <MapLink provider="waze" size="sm" />
     </div>
   );
 }
-
-// ──────────── C) ArriveCard — order ready notice ────────────
 
 export function ArriveCard() {
   return (
@@ -155,8 +128,8 @@ export function ArriveCard() {
         <p className="text-xs text-stone-500 mt-0.5">Pasa a recogerlo a nuestra sucursal: {STORE.address}. Te esperamos.</p>
       </div>
       <div className="flex gap-2">
-        <MapLink provider="maps" variant="compact" />
-        <MapLink provider="waze" variant="compact" />
+        <MapLink provider="maps" size="sm" />
+        <MapLink provider="waze" size="sm" />
       </div>
     </div>
   );
