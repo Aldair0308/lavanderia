@@ -13,7 +13,10 @@ function SvgMaps({ size = 20 }: { size?: number }) {
 function SvgWaze({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm8 10c0 4.41-3.59 8-8 8s-8-3.59-8-8 3.59-8 8-8 8 3.59 8 8z" />
+      <path d="M21 10c0-4.97-4.03-9-9-9s-9 4.03-9 9c0 2.03.67 3.9 1.8 5.41L3 21l5.59-1.8c1.51 1.13 3.38 1.8 5.41 1.8 4.97 0 9-4.03 9-9z" />
+      <circle cx="8.5" cy="10.5" r="1.5" fill="white" />
+      <circle cx="15.5" cy="10.5" r="1.5" fill="white" />
+      <path d="M12 16c1.66 0 3-1.34 3-3H9c0 1.66 1.34 3 3 3z" fill="white" />
     </svg>
   );
 }
