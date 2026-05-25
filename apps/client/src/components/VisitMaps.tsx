@@ -1,23 +1,28 @@
 import { STORE, googleMapsUrl, wazeUrl } from '../lib/store-location';
 
-// ──────────── Icon primitives ────────────
-
-function SvgMaps({ size = 20 }: { size?: number }) {
+function LogoMaps({ size = 20 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-    </svg>
+    <img
+      src="/logos/Maps.jpg"
+      alt="Google Maps"
+      width={size}
+      height={size}
+      className="rounded-sm object-contain"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
-function SvgWaze({ size = 20 }: { size?: number }) {
+function LogoWaze({ size = 20 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M21 10c0-4.97-4.03-9-9-9s-9 4.03-9 9c0 2.03.67 3.9 1.8 5.41L3 21l5.59-1.8c1.51 1.13 3.38 1.8 5.41 1.8 4.97 0 9-4.03 9-9z" />
-      <circle cx="8.5" cy="10.5" r="1.5" fill="white" />
-      <circle cx="15.5" cy="10.5" r="1.5" fill="white" />
-      <path d="M12 16c1.66 0 3-1.34 3-3H9c0 1.66 1.34 3 3 3z" fill="white" />
-    </svg>
+    <img
+      src="/logos/Waze.png"
+      alt="Waze"
+      width={size}
+      height={size}
+      className="rounded-sm object-contain"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
@@ -42,19 +47,19 @@ interface MapLinkProps {
 
 const PROVIDER_META = {
   maps: {
-    label: 'Google Maps',
-    short: 'Maps',
+    label: 'Abrir en Google Maps',
+    short: 'Google Maps',
     href: googleMapsUrl,
-    icon: SvgMaps,
+    icon: LogoMaps,
     bg: 'bg-[#4285F4]',
     hover: 'hover:bg-[#3367D6]',
     text: 'text-white',
   },
   waze: {
-    label: 'Waze',
+    label: 'Abrir en Waze',
     short: 'Waze',
     href: wazeUrl,
-    icon: SvgWaze,
+    icon: LogoWaze,
     bg: 'bg-[#33CCFF]',
     hover: 'hover:bg-[#29B8E6]',
     text: 'text-[#0B0B0B]',
