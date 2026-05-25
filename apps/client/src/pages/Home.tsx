@@ -158,8 +158,10 @@ export default function Home() {
       {/* ─── Services preview ─── */}
       <section className="bg-white py-20 md:py-28">
         <div className="max-w-6xl mx-auto px-5">
-          <p className="font-mono text-teal-600 text-xs uppercase tracking-widest mb-3">// nuestros servicios</p>
-          <h2 className="font-display text-3xl md:text-4xl text-stone-900 mb-12">Todo lo que tu ropa necesita</h2>
+          <div className="text-center">
+            <p className="font-mono text-teal-600 text-xs uppercase tracking-widest mb-3">// nuestros servicios</p>
+            <h2 className="font-display text-3xl md:text-4xl text-stone-900 mb-12">Todo lo que tu ropa necesita</h2>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {services.map((s) => (
@@ -186,9 +188,11 @@ export default function Home() {
       {/* ─── How it works ─── */}
       <section className="bg-cream py-20 md:py-28">
         <div className="max-w-6xl mx-auto px-5">
-          <p className="font-mono text-teal-600 text-xs uppercase tracking-widest mb-3">// cómo funciona</p>
-          <h2 className="font-display text-3xl md:text-4xl text-stone-900 mb-4">Tres pasos y listo</h2>
-          <p className="text-stone-500 text-lg max-w-lg mb-14">Sin complicaciones. Sin esperas. Tú pides, nosotros entregamos.</p>
+          <div className="text-center">
+            <p className="font-mono text-teal-600 text-xs uppercase tracking-widest mb-3">// cómo funciona</p>
+            <h2 className="font-display text-3xl md:text-4xl text-stone-900 mb-4">Tres pasos y listo</h2>
+            <p className="text-stone-500 text-lg max-w-lg mx-auto mb-14">Sin complicaciones. Sin esperas. Tú pides, nosotros entregamos.</p>
+          </div>
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0">
             {/* Connecting line */}
