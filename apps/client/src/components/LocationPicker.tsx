@@ -1,11 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet'
 import { useLocationSearch } from '../hooks/useLocationSearch'
-import { reverseGeocode, formatAddress, type Suggestion } from '../lib/location'
+import {
+  reverseGeocode,
+  formatAddress,
+  SAN_MATEO_CENTER,
+  SAN_MATEO_BOUNDS,
+  type Suggestion,
+} from '../lib/location'
 import 'leaflet/dist/leaflet.css'
 
-const DEFAULT_CENTER: [number, number] = [19.4284, -99.1488]
-const DEFAULT_ZOOM = 14
+const DEFAULT_ZOOM = 15
 
 function SvgSearch() {
   return (
@@ -36,6 +41,15 @@ function SvgCheck() {
   return (
     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+    </svg>
+  )
+}
+
+function SvgCrosshair() {
+  return (
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v4m0 12v4m-10-8h4m12 0h4" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   )
 }
@@ -73,6 +87,10 @@ function MapController({
   const ready = useRef(false)
 
   useEffect(() => {
+    map.setMaxBounds(SAN_MATEO_BOUNDS)
+  }, [map])
+
+  useEffect(() => {
     if (!ready.current) {
       map.setView(center, map.getZoom())
       ready.current = true
@@ -108,12 +126,14 @@ export default function LocationPicker({
 }: LocationPickerProps) {
   const [query, setQuery] = useState('')
   const [selectedPos, setSelectedPos] = useState<[number, number]>([
-    initialLat ?? DEFAULT_CENTER[0],
-    initialLng ?? DEFAULT_CENTER[1],
+    initialLat ?? SAN_MATEO_CENTER[0],
+    initialLng ?? SAN_MATEO_CENTER[1],
   ])
   const [address, setAddress] = useState(initialAddress ?? '')
   const [resolving, setResolving] = useState(false)
+  const [locating, setLocating] = useState(false)
   const [pickedFromSearch, setPickedFromSearch] = useState(false)
+  const [geoError, setGeoError] = useState('')
   const { suggestions, loading } = useLocationSearch(query)
   const suggestionsRef = useRef<HTMLUListElement>(null)
   const [focusedIdx, setFocusedIdx] = useState(-1)
@@ -124,7 +144,7 @@ export default function LocationPicker({
       const result = await reverseGeocode(lat, lng)
       setAddress(formatAddress(result))
     } catch {
-      setAddress('No se pudo determinar la dirección')
+      setAddress('San Mateo Atenco, Estado de México')
     } finally {
       setResolving(false)
     }
@@ -145,6 +165,7 @@ export default function LocationPicker({
     setAddress(formatAddress(s))
     setPickedFromSearch(true)
     setFocusedIdx(-1)
+    setGeoError('')
   }
 
   const handleCenterChange = useCallback(
@@ -154,6 +175,34 @@ export default function LocationPicker({
     },
     [reverseResolve],
   )
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) {
+      setGeoError('Tu navegador no soporta geolocalización')
+      return
+    }
+    setLocating(true)
+    setGeoError('')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setSelectedPos([lat, lng])
+        setPickedFromSearch(true)
+        reverseResolve(lat, lng)
+        setLocating(false)
+      },
+      (err) => {
+        setLocating(false)
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoError('Permiso denegado. Actívalo desde la configuración de tu navegador.')
+        } else {
+          setGeoError('No se pudo obtener tu ubicación. Intenta de nuevo.')
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
+  }
 
   const handleConfirm = () => {
     if (!address) return
@@ -225,7 +274,7 @@ export default function LocationPicker({
             )}
             {!loading && suggestions.length === 0 && (
               <li className="px-4 py-3 text-sm text-stone-500 text-center">
-                Sin resultados
+                Sin resultados en San Mateo Atenco
               </li>
             )}
             {suggestions.map((s, i) => (
@@ -241,10 +290,7 @@ export default function LocationPicker({
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-stone-900 truncate">
-                    {s.display_name.split(',').slice(0, 2).join(',')}
-                  </p>
-                  <p className="text-xs text-stone-500 truncate mt-0.5">
-                    {s.display_name.split(',').slice(2, 4).join(',')}
+                    {s.display_name}
                   </p>
                 </div>
               </li>
@@ -261,6 +307,8 @@ export default function LocationPicker({
           className="w-full h-full"
           zoomControl={true}
           attributionControl={false}
+          maxBounds={SAN_MATEO_BOUNDS}
+          maxBoundsViscosity={1}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -269,10 +317,39 @@ export default function LocationPicker({
           <MapController center={selectedPos} onCenterChange={handleCenterChange} />
         </MapContainer>
         <MapPinOverlay />
+
+        {/* Locate button */}
+        <button
+          type="button"
+          onClick={handleLocate}
+          disabled={locating}
+          className="absolute top-3 right-3 z-[500] w-10 h-10 bg-white rounded-full shadow-md border border-border flex items-center justify-center text-teal-600 hover:bg-cream transition disabled:opacity-50"
+          title="Usar mi ubicación actual"
+        >
+          {locating ? (
+            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+          ) : (
+            <SvgCrosshair />
+          )}
+        </button>
+
+        {/* Bottom hint */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[500] text-[10px] text-stone-400 bg-white/80 px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
           Arrastra el mapa para mover el marcador
         </div>
       </div>
+
+      {/* ── Geo error ── */}
+      {geoError && (
+        <div className="shrink-0 px-4 pt-2">
+          <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-200">
+            {geoError}
+          </p>
+        </div>
+      )}
 
       {/* ── Bottom card ── */}
       <div className="shrink-0 bg-white border-t border-border px-4 pt-3 pb-6 space-y-3">
@@ -286,7 +363,7 @@ export default function LocationPicker({
             ) : (
               <>
                 <p className="text-sm font-semibold text-stone-900 leading-tight truncate">
-                  {address || 'Selecciona una ubicación'}
+                  {address || 'San Mateo Atenco, Estado de México'}
                 </p>
                 <p className="text-xs text-stone-500 mt-0.5">
                   {selectedPos[0].toFixed(5)}, {selectedPos[1].toFixed(5)}
