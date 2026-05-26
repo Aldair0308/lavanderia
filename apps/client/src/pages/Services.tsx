@@ -2,39 +2,13 @@ import { Link } from 'react-router-dom';
 import { useServices } from '../hooks/useServices';
 import { FooterMapsRow } from '../components/VisitMaps';
 
-function getGradient(name: string) {
+function serviceImage(name: string) {
   const n = name.toLowerCase();
-  if (n.includes('lavado') || n.includes('wash')) return 'from-[#E0F2FE] to-[#BAE6FD]';
-  if (n.includes('secado') || n.includes('dry')) return 'from-[#FEF3C7] to-[#FDE68A]';
-  if (n.includes('planchado') || n.includes('iron')) return 'from-[#F3E8FF] to-[#DDD6FE]';
-  return 'from-[#99F6E4] to-[#A7F3D0]';
-}
-
-function getIcon(name: string) {
-  const n = name.toLowerCase();
-  if (n.includes('lavado') || n.includes('wash'))
-    return (
-      <svg className="w-10 h-10 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714a2.25 2.25 0 0 0 .659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 0 1-1.59.659H9.06a2.25 2.25 0 0 1-1.591-.659L5 14.5m14 0V17a2.25 2.25 0 0 1-2.25 2.25H7.25A2.25 2.25 0 0 1 5 17v-2.5" />
-      </svg>
-    );
-  if (n.includes('secado') || n.includes('dry'))
-    return (
-      <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-      </svg>
-    );
-  if (n.includes('planchado') || n.includes('iron'))
-    return (
-      <svg className="w-10 h-10 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5h16.5m-16.5 0a1.5 1.5 0 0 1-1.5-1.5V7.5A1.5 1.5 0 0 1 3.75 6h4.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44h7.629a1.5 1.5 0 0 1 1.5 1.5v1.5a1.5 1.5 0 0 1-1.5 1.5m-16.5 0v3a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-3" />
-      </svg>
-    );
-  return (
-    <svg className="w-10 h-10 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" />
-    </svg>
-  );
+  if (n.includes('lavado') && n.includes('planchado')) return '/services/completo.jpeg';
+  if (n.includes('lavado') || n.includes('wash')) return '/services/lavado.png';
+  if (n.includes('secado') || n.includes('dry')) return '/services/secado.png';
+  if (n.includes('planchado') || n.includes('iron')) return '/services/planchado.png';
+  return '/services/completo.jpeg';
 }
 
 function getDescription(name: string) {
@@ -130,12 +104,13 @@ export default function Services() {
                 key={name}
                 className="group bg-white rounded-2xl border border-border overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-teal-600"
               >
-                <div
-                  className={`h-[180px] bg-gradient-to-br ${getGradient(name)} flex items-center justify-center`}
-                >
-                  <div className="w-16 h-16 bg-white/70 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-sm">
-                    {getIcon(name)}
-                  </div>
+                <div className="aspect-video overflow-hidden bg-cream">
+                  <img
+                    src={serviceImage(name)}
+                    alt={name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
                 </div>
 
                 <div className="p-6">
