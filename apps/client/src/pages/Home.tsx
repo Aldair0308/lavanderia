@@ -3,36 +3,21 @@ import { VisitSection, FooterMapsRow } from '../components/VisitMaps';
 
 const services = [
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.848 1.849a2.25 2.25 0 0 1-1.59.659H7.638a2.25 2.25 0 0 1-1.591-.659L4.2 15.3m15.6 0a2.25 2.25 0 0 1 .659 1.591v2.034A2.25 2.25 0 0 1 18.225 21H5.775A2.25 2.25 0 0 1 3.525 18.925V16.89c0-.597.237-1.17.659-1.591" />
-      </svg>
-    ),
-    bg: 'bg-blue-100 text-blue-600',
+    image: '/services/lavado.png',
     title: 'Lavado',
     description: 'Lavado profesional con detergentes suaves y fragancia fresca. Tu ropa queda impecable.',
     price: '$24/kg',
     min: 'mínimo 5 kg',
   },
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-      </svg>
-    ),
-    bg: 'bg-amber-200 text-amber-600',
+    image: '/services/secado.png',
     title: 'Secado',
     description: 'Secado al aire o en máquina, según el tipo de prenda. Cuidamos cada fibra.',
     price: '$18/kg',
     min: 'mínimo 3 kg',
   },
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.242-2.182-1.327 7.868a2.25 2.25 0 0 1-2.227 1.932H6.562a2.25 2.25 0 0 1-2.227-1.932L3.008 8.318m17.484 0A2.25 2.25 0 0 0 18.75 6h-2.25m-9.002 0H5.25a2.25 2.25 0 0 0-2.248 2.318" />
-      </svg>
-    ),
-    bg: 'bg-purple-100 text-purple-600',
+    image: '/services/planchado.png',
     title: 'Planchado',
     description: 'Planchado profesional con vapor. Cada prenda queda lista para usar y colgar.',
     price: '$32/kg',
@@ -167,18 +152,25 @@ export default function Home() {
             {services.map((s) => (
               <div
                 key={s.title}
-                className="bg-cream rounded-lg p-6 border border-border/40 hover:border-teal-600 hover:-translate-y-1 transition-all cursor-default group"
+                className="bg-white rounded-xl border border-border/40 overflow-hidden hover:border-teal-600 hover:-translate-y-1 hover:shadow-md transition-all cursor-default group"
               >
-                <div className={`w-12 h-12 rounded-lg ${s.bg} flex items-center justify-center mb-4`}>
-                  {s.icon}
+                <div className="aspect-video overflow-hidden bg-cream">
+                  <img
+                    src={s.image}
+                    alt={s.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
                 </div>
-                <h3 className="font-display text-xl text-stone-900 mb-2">{s.title}</h3>
-                <p className="text-stone-500 text-sm leading-relaxed mb-4">{s.description}</p>
-                <p className="font-mono text-xs text-stone-500">
-                  <span className="text-teal-600 font-semibold">{s.price}</span>
-                  <span className="mx-1">/</span>
-                  {s.min}
-                </p>
+                <div className="p-5">
+                  <h3 className="font-display text-xl text-stone-900 mb-2">{s.title}</h3>
+                  <p className="font-body text-sm text-stone-500 leading-relaxed mb-4">{s.description}</p>
+                  <p className="font-mono text-sm text-stone-500">
+                    <span className="text-teal-600 font-semibold">{s.price}</span>
+                    <span className="mx-1.5">/</span>
+                    {s.min}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
